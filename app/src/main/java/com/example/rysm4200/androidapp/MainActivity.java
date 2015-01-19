@@ -15,6 +15,7 @@ public class MainActivity extends Activity {
         
         //Github test
         int i;
+        int j;
         //Githubtest 2
     }
 
