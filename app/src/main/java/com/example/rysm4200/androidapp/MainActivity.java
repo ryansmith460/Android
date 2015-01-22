@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 
 public class MainActivity extends Activity {
@@ -12,11 +13,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
-        //Github test
-        //Githubtest 2
-    }
 
+        //Configure main screen
+        getActionBar().setIcon(R.drawable.eraser);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
