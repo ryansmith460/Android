@@ -18,8 +18,8 @@ import java.util.UUID;
 public class MainActivity extends Activity {
     //Bluetooth
     BluetoothThread bT;
-    private BluetoothAdapter adapter;
-    private BluetoothSocket socket;
+    private BluetoothAdapter adapter = null;
+    private BluetoothSocket socket = null;
     private static final UUID bT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static String address = "30:14:10:15:02:96";
 
@@ -47,12 +47,16 @@ public class MainActivity extends Activity {
         getActionBar().setIcon(R.drawable.eraser);
 
         //Set up Bluetooth Communication
+        adapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice bTDevice = adapter.getRemoteDevice(address);
+
         try
         {
             socket = bTDevice.createRfcommSocketToServiceRecord(bT_UUID);
         }
-        catch (IOException e) { }
+        catch (IOException e) {
+            int j = 0;
+        }
 
         adapter.cancelDiscovery();
 
