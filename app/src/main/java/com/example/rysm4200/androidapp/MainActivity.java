@@ -12,16 +12,15 @@ import android.widget.TextView;
 import java.io.IOException;
 import android.view.View;
 import android.graphics.Bitmap;
-
 import java.util.UUID;
 
 public class MainActivity extends Activity {
     //Bluetooth
-    BluetoothThread bT;
     private BluetoothAdapter adapter = null;
     private BluetoothSocket socket = null;
     private static final UUID bT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static String address = "30:14:10:15:02:96";
+    BluetoothThread bT;
 
     //Hard-coded image size
     int width = 320;
@@ -44,7 +43,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         //Configure main screen
-        getActionBar().setIcon(R.drawable.eraser);
+        //getActionBar().setIcon(R.drawable.eraser);
 
         //Set up Bluetooth Communication
         adapter = BluetoothAdapter.getDefaultAdapter();
@@ -54,9 +53,7 @@ public class MainActivity extends Activity {
         {
             socket = bTDevice.createRfcommSocketToServiceRecord(bT_UUID);
         }
-        catch (IOException e) {
-            int j = 0;
-        }
+        catch (IOException e) {}
 
         adapter.cancelDiscovery();
 
