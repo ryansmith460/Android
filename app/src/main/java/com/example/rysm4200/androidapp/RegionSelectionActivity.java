@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
+import android.view.View;
 
 public class RegionSelectionActivity extends Activity {
     //
@@ -48,11 +49,17 @@ public class RegionSelectionActivity extends Activity {
     public void setWhiteboardImage(Bitmap bmpImage) {
     }
 
-    public void eraseButtonHandler()
+    private int[] getRegions()
+    {
+        int[] regionStub = {67, 78};
+        return regionStub;
+    }
+
+    public void eraseButtonHandler(View view)
     {
         Intent data = new Intent();
-        //data.setData(getRegions());
-        setResult(GET_COORDINATES_ID, data);
+        data.putExtra("Coordinates", getRegions());
+        setResult(RESULT_OK, data);
         finish();
     }
 

@@ -111,7 +111,7 @@ public class MainActivity extends Activity {
         bT.startSaving();
 
         //Wait until image is ready, then get the image
-        while (bT.getSaveStatus() == true) ;
+        //while (bT.getSaveStatus() == true) ;
         imageBytes = bT.getImage();
 
         byte tempValue;
@@ -150,12 +150,11 @@ public class MainActivity extends Activity {
         {
             if(resultCode == RESULT_OK)
             {
-                int coordinates = data.getIntExtra("Coordinates", 0);
-
+                int [] coordinates = data.getIntArrayExtra("Coordinates");
                 //Send the coordinates to the Camera module
-                if (!bT.sendData(coordinates)) {
+                //if (!bT.sendData(coordinates)) {
                     //Display error message
-                }
+                //}
             }
         }
     }
