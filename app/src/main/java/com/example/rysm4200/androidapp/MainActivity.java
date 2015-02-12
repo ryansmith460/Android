@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
     private static final UUID bT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static String address = "30:14:10:15:02:96";
     BluetoothThread bT;
+    public boolean bluetoothRunning = false;
 
     //Hard-coded image size
     int width = 320;
@@ -36,6 +37,14 @@ public class MainActivity extends Activity {
     //Region Selection Activity
     RegionSelectionActivity regionSelection;
     int GET_COORDINATES_ID = 1;
+
+    //Erase All
+    boolean eraseAll = false;
+    int eraseAllCode = 1;
+
+    //Emergency Stop
+    boolean emergencyStop = true;
+    int emergencyStopCode = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +116,11 @@ public class MainActivity extends Activity {
     //Region selection button handler
     public void regionSelectionButtonHandler(View view) {
         //Get an image of the board
-        bT.start();
+        if (bluetoothRunning == false)
+        {
+            bT.start();
+            bluetoothRunning = true;
+        }
         bT.startSaving();
 
         //Wait until image is ready, then get the image
@@ -156,6 +169,36 @@ public class MainActivity extends Activity {
                     //Display error message
                 //}
             }
+        }
+    }
+
+    public void eraseAllButtonHandler(View view)
+    {
+        if (bluetoothRunning == false)
+        {
+            bT.start();
+            bluetoothRunning = true;
+        }
+        eraseAll = true;
+        if (eraseAll == true)
+        {
+            bT.sendData(eraseAllCode);
+            eraseAll = false;
+        }
+
+    }
+
+    public void emergencyStopButtonHandler(View view) {
+        if (bluetoothRunning == false)
+        {
+            bT.start();
+            bluetoothRunning = true;
+        }
+        emergencyStop = true;
+        if (emergencyStop == true)
+        {
+            bT.sendData(emergencyStopCode);
+            emergencyStop = false;
         }
     }
 }

@@ -4,7 +4,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.example.rysm4200.androidapp.RegionSelectionActivity">
+    tools:context="com.example.rysm4200.androidapp.RegionSelectionActivity"
+    >
 
     <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -18,5 +19,35 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="43dp"
         android:onClick="eraseButtonHandler"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go Back to Main Screen"
+        android:id="@+id/goBackButton"
+        android:layout_alignTop="@+id/eraseButton"
+        android:layout_toRightOf="@+id/eraseButton"
+        android:layout_toEndOf="@+id/eraseButton"
+        android:onClick="goBackButtonHandler" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+"
+        android:id="@+id/plusButton"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/goBackButton"
+        android:layout_alignEnd="@+id/goBackButton"
+        android:onClick="plusButtonHandler" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_below="@+id/plusButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="99dp" />
 
 </RelativeLayout>
