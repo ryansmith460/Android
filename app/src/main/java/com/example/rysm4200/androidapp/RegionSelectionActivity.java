@@ -29,18 +29,25 @@ public class RegionSelectionActivity extends Activity {
     float m_downYValue = 0;
     float m_upXValue = 0;
     float m_upYValue = 0;
+    float lowX = 0;
+    float lowY = 0;
+    float highX = 0;
+    float highY = 0;
     boolean touchEvent = false;
+    int numberOfRegions = 0;
+    public int regions[] = new int[64];
 
 
     //
     int GET_COORDINATES_ID;
-    ImageView imageView = new ImageView(this);
+    ImageView whiteboardImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_region_selection);
-        imageView.setOnTouchListener(listener);
+        whiteboardImageView = (ImageView)findViewById(R.id.whiteboardImageView);
+        whiteboardImageView.setOnTouchListener(listener);
     }
 
 
@@ -75,8 +82,11 @@ public class RegionSelectionActivity extends Activity {
     }
 
     private int[] getRegions() {
-        int[] regionStub = {67, 78};
-        return regionStub;
+
+
+
+        //int[] regionStub = {67, 78};
+        return regions;
     }
 
     public void eraseButtonHandler(View view) {
@@ -93,8 +103,33 @@ public class RegionSelectionActivity extends Activity {
     }
 
     //used to add region that is currently drawn
-    public void plusButtonHandler(View view) {
-
+    public void saveSelectionButtonHandler(View view)
+    {
+        if (m_downXValue < m_upXValue)
+        {
+            lowX = m_downXValue;
+            highX = m_upXValue;
+        }
+        else
+        {
+            lowX = m_upXValue;
+            highX = m_downXValue;
+        }
+        if (m_downYValue < m_upYValue)
+        {
+            lowY = m_downYValue;
+            highY = m_upYValue;
+        }
+        else
+        {
+            lowY = m_upYValue;
+            highY = m_downYValue;
+        }
+        regions[(4*numberOfRegions)] = (int)lowX;
+        regions[(4*numberOfRegions) + 1] = (int)lowY;
+        regions[(4*numberOfRegions) + 2] = (int)highX;
+        regions[(4*numberOfRegions) + 3] = (int)highY;
+        numberOfRegions++;
     }
 
     //
@@ -107,24 +142,26 @@ public class RegionSelectionActivity extends Activity {
 
     View.OnTouchListener listener = new View.OnTouchListener() {
 
-        public boolean onTouch(View imageView, MotionEvent e) {
+        public boolean onTouch(View whiteboardImageView, MotionEvent e) {
             touchEvent = true;
-            switch (e.getAction()) {
-                case MotionEvent.ACTION_DOWN: {
-                    //store the X value when the user's finger was pressed down
-                    m_downXValue = e.getX();
-                    m_downYValue = e.getY();
-                    Log.d("down values", "down x:" +m_downXValue);
-                    Log.d("down values", "down y:" +m_downYValue);
+            if (touchEvent == true) {
+                switch (e.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        //store the X value when the user's finger was pressed down
+                        m_downXValue = e.getX();
+                        m_downYValue = e.getY();
+                        Log.d("down values", "down x:" +m_downXValue);
+                        Log.d("down values", "down y:" +m_downYValue);
 
-                    break;
-                }
-                case MotionEvent.ACTION_UP: {
-                    //store the X value when the user's finger was pressed down
-                    m_upXValue = e.getX();
-                    m_upYValue = e.getY();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        //store the X value when the user's finger was pressed down
+                        m_upXValue = e.getX();
+                        m_upYValue = e.getY();
 
-                    break;
+                        break;
+                    }
                 }
             }
             return true;

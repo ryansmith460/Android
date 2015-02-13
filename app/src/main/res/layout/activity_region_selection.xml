@@ -13,7 +13,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Erase All"
+        android:text="Erase Regions"
         android:id="@+id/eraseButton"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
@@ -34,20 +34,32 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="+"
-        android:id="@+id/plusButton"
+        android:text="Save Selection"
+        android:id="@+id/saveSelectionButton"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/goBackButton"
         android:layout_alignEnd="@+id/goBackButton"
-        android:onClick="plusButtonHandler" />
+        android:onClick="saveSelectionButtonHandler" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView"
-        android:layout_below="@+id/plusButton"
+        android:layout_below="@+id/saveSelectionButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="99dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/whiteboardImageView"
+        android:layout_below="@+id/saveSelectionButton"
+        android:layout_alignRight="@+id/saveSelectionButton"
+        android:layout_alignEnd="@+id/saveSelectionButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/eraseButton"
+        android:longClickable="true" />
 
 </RelativeLayout>
