@@ -47,7 +47,7 @@ public class SettingsActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_settings, menu);
+        getMenuInflater().inflate(R.menu.menu_region_selection, menu);
         return true;
     }
 
@@ -131,7 +131,7 @@ public class SettingsActivity extends Activity {
 
     View.OnTouchListener listener = new View.OnTouchListener() {
 
-        public boolean onTouch(View whiteboardImageView, MotionEvent e) {
+        public boolean onTouch(View settingsWhiteboardImageView, MotionEvent e) {
             touchEvent = true;
             if (touchEvent == true) {
                 switch (e.getAction()) {
@@ -139,8 +139,8 @@ public class SettingsActivity extends Activity {
                         //store the X value when the user's finger was pressed down
                         m_downXValue = e.getX();
                         m_downYValue = e.getY();
-                        Log.d("down values", "down x:" + m_downXValue);
-                        Log.d("down values", "down y:" +m_downYValue);
+                        //Log.d("down values", "down x:" + m_downXValue);
+                        //Log.d("down values", "down y:" +m_downYValue);
 
                         break;
                     }

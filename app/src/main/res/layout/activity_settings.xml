@@ -21,7 +21,7 @@
         android:longClickable="true" />
 
     <Button
-        android:layout_width="164dp"
+        android:layout_width="149dp"
         android:layout_height="wrap_content"
         android:text="Save"
         android:id="@+id/saveButton"
