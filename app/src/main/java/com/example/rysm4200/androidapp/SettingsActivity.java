@@ -25,9 +25,10 @@ public class SettingsActivity extends Activity {
     float highX = 0;
     float highY = 0;
     boolean touchEvent = false;
+    public int whiteboard [] = new int[4];
 
     int GET_BOARD_COORDINATES_ID;
-    ImageView whiteboardImageView;
+    ImageView settingsWhiteboardImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +39,15 @@ public class SettingsActivity extends Activity {
     }
 
 
+    public void goBackSettingsButtonHandler(View view) {
+        //Use the Main Activity to exit this screen without erasing regions
+        finish();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        //getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
     }
 
@@ -68,17 +74,14 @@ public class SettingsActivity extends Activity {
     public void setWhiteboardImage(Bitmap bmpImage) {
     }
 
-    private int[] getRegions() {
+    private int[] getWhiteboardCoordinates() {
 
-
-
-        //int[] regionStub = {67, 78};
-        return regions;
+        return whiteboard;
     }
 
-    public void eraseButtonHandler(View view) {
+    public void exitSaveButtonHandler(View view) {
         Intent data = new Intent();
-        data.putExtra("Coordinates", getRegions());
+        data.putExtra("Coordinates", getWhiteboardCoordinates());
         setResult(RESULT_OK, data);
         finish();
     }
@@ -90,7 +93,7 @@ public class SettingsActivity extends Activity {
     }
 
     //used to add region that is currently drawn
-    public void saveSelectionButtonHandler(View view)
+    public void saveButtonHandler(View view)
     {
         if (m_downXValue < m_upXValue)
         {
@@ -112,11 +115,10 @@ public class SettingsActivity extends Activity {
             lowY = m_upYValue;
             highY = m_downYValue;
         }
-        regions[(4*numberOfRegions)] = (int)lowX;
-        regions[(4*numberOfRegions) + 1] = (int)lowY;
-        regions[(4*numberOfRegions) + 2] = (int)highX;
-        regions[(4*numberOfRegions) + 3] = (int)highY;
-        numberOfRegions++;
+        whiteboard[0] = (int)lowX;
+        whiteboard[1] = (int)lowY;
+        whiteboard[2] = (int)highX;
+        whiteboard[3] = (int)highY;
     }
 
     //
@@ -155,5 +157,7 @@ public class SettingsActivity extends Activity {
 
         }
     };
+
+
 }
 

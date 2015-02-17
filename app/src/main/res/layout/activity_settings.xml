@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:weightSum="1">
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go Back without Saving"
+        android:id="@+id/goBackButton"
+        android:onClick="goBackSettingsButtonHandler" />
+
+    <ImageView
+        android:layout_width="341dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/settingsWhiteboardImageView"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.71"
+        android:clickable="true"
+        android:longClickable="true" />
+
+    <Button
+        android:layout_width="164dp"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/saveButton"
+        android:layout_gravity="right"
+        android:onClick="saveButtonHandler" />
+
+    <Button
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:text="Exit"
+        android:id="@+id/exitSaveButton"
+        android:onClick="exitSaveButtonHandler"
+        android:layout_gravity="right" />
 </LinearLayout>
