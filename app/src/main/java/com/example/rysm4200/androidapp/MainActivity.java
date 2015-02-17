@@ -38,6 +38,10 @@ public class MainActivity extends Activity {
     RegionSelectionActivity regionSelection;
     int GET_COORDINATES_ID = 1;
 
+    //Settings Activity
+    SettingsActivity settingsActivity;
+    int GET_BOARD_COORDINATES_ID = 2;
+
     //Erase All
     boolean eraseAll = false;
     int eraseAllCode = 1;
@@ -89,6 +93,10 @@ public class MainActivity extends Activity {
         //Create Region selection activity
         regionSelection = new RegionSelectionActivity();
         regionSelection.Init(GET_COORDINATES_ID);
+
+        //Create Settings Activity
+        settingsActivity = new SettingsActivity();
+        settingsActivity.Init(GET_BOARD_COORDINATES_ID);
     }
 
     @Override
@@ -111,6 +119,49 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    //Settings button handler
+    public void settingsButtonHandler(View view) {
+        //Get an image of the board
+        if (bluetoothRunning == false)
+        {
+            bT.start();
+            bluetoothRunning = true;
+        }
+        bT.startSaving();
+
+        //Wait until image is ready, then get the image
+        //while (bT.getSaveStatus() == true) ;
+        imageBytes = bT.getImage();
+
+        byte tempValue;
+        //Convert negative values to positives
+        for (int i = 0; i < imageBytes.length; i++) {
+            tempValue = imageBytes[i];
+            if (tempValue < 0)
+                imageIntegers[i] = (int) tempValue + 256;
+            else
+                imageIntegers[i] = (int) tempValue;
+        }
+
+        //Check width and height are consistent with array size
+        if ((numImagePts / 3) != (width * height)) {
+            throw new ArrayStoreException();
+        }
+
+        //Convert to bitmap
+        for (int intIndex = 0; intIndex < numImagePts - 2; intIndex = intIndex + 3) {
+            intColors[intIndex / 3] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[intIndex + 1] << 8) | imageIntegers[intIndex + 2];
+        }
+
+        //Assign image to settings activity
+        Bitmap bmpImage = Bitmap.createBitmap(intColors, width, height, Bitmap.Config.ARGB_8888);
+        settingsActivity.setWhiteboardImage(bmpImage);
+
+        //Use the Settings Activity to get the regions
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivityForResult(intent, GET_BOARD_COORDINATES_ID);
     }
 
     //Region selection button handler

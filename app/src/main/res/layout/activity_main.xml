@@ -32,6 +32,17 @@
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/eraseAllButton"
         android:onClick="emergencyStopButtonHandler" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:id="@+id/settingsButton"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="settingsButtonHandler" />
 </RelativeLayout>
     
 
