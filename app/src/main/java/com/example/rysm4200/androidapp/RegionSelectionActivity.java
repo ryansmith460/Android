@@ -47,6 +47,13 @@ public class RegionSelectionActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_region_selection);
         whiteboardImageView = (ImageView)findViewById(R.id.whiteboardImageView);
+        Bundle extras = getIntent().getExtras();
+        int [] intColors  = extras.getIntArray("COLORS");
+
+        //Assign image to Region selection activity
+        Bitmap bmpImage = Bitmap.createBitmap(intColors, 320, 240, Bitmap.Config.ARGB_8888);
+
+        whiteboardImageView.setImageBitmap(bmpImage);
         whiteboardImageView.setOnTouchListener(listener);
     }
 
@@ -76,9 +83,6 @@ public class RegionSelectionActivity extends Activity {
     public void Init(int get_coordinates_id) {
         //Define the get_coordinates id
         GET_COORDINATES_ID = get_coordinates_id;
-    }
-
-    public void setWhiteboardImage(Bitmap bmpImage) {
     }
 
     private int[] getRegions() {

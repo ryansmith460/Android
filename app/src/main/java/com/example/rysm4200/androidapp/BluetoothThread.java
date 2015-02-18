@@ -60,7 +60,7 @@ public class BluetoothThread extends Thread{
         return image;
     }
 
-    public boolean sendData(int data)
+    public boolean sendData(byte[] data)
     {
         try
         {

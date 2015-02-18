@@ -175,7 +175,7 @@ public class MainActivity extends Activity {
         bT.startSaving();
 
         //Wait until image is ready, then get the image
-        //while (bT.getSaveStatus() == true) ;
+        while (bT.getSaveStatus() == true) ;
         imageBytes = bT.getImage();
 
         byte tempValue;
@@ -198,12 +198,9 @@ public class MainActivity extends Activity {
             intColors[intIndex / 3] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[intIndex + 1] << 8) | imageIntegers[intIndex + 2];
         }
 
-        //Assign image to Region selection activity
-        Bitmap bmpImage = Bitmap.createBitmap(intColors, width, height, Bitmap.Config.ARGB_8888);
-        regionSelection.setWhiteboardImage(bmpImage);
-
         //Use the Region Selection Activity to get the regions
-        Intent intent = new Intent(this, RegionSelectionActivity.class);
+        Intent intent = new Intent(this, regionSelection.getClass());
+        intent.putExtra("COLORS", intColors);
         startActivityForResult(intent, GET_COORDINATES_ID);
     }
 
@@ -216,9 +213,10 @@ public class MainActivity extends Activity {
             {
                 int [] coordinates = data.getIntArrayExtra("Coordinates");
                 //Send the coordinates to the Camera module
-                //if (!bT.sendData(coordinates)) {
+                byte [] test = {1,2,3,4};
+                if (!bT.sendData(test)) {
                     //Display error message
-                //}
+                }
             }
         }
     }
@@ -233,7 +231,7 @@ public class MainActivity extends Activity {
         eraseAll = true;
         if (eraseAll == true)
         {
-            bT.sendData(eraseAllCode);
+            //bT.sendData(eraseAllCode);
             eraseAll = false;
         }
 
@@ -248,7 +246,7 @@ public class MainActivity extends Activity {
         emergencyStop = true;
         if (emergencyStop == true)
         {
-            bT.sendData(emergencyStopCode);
+            //bT.sendData(emergencyStopCode);
             emergencyStop = false;
         }
     }
