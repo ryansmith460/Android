@@ -22,6 +22,10 @@
             android:name=".RegionSelectionActivity"
             android:label="@string/title_activity_region_selection" >
         </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/action_settings" >
+        </activity>
     </application>
 
 </manifest>

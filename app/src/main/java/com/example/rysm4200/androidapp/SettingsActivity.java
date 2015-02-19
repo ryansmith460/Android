@@ -35,6 +35,13 @@ public class SettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         settingsWhiteboardImageView = (ImageView)findViewById(R.id.settingsWhiteboardImageView);
+        Bundle extras = getIntent().getExtras();
+        int [] intColors  = extras.getIntArray("COLORS");
+
+        //Assign image to Region selection activity
+        Bitmap bmpImage = Bitmap.createBitmap(intColors, 320, 240, Bitmap.Config.ARGB_8888);
+
+        settingsWhiteboardImageView.setImageBitmap(bmpImage);
         settingsWhiteboardImageView.setOnTouchListener(listener);
     }
 

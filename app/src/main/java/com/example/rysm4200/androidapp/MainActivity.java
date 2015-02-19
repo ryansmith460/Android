@@ -157,11 +157,12 @@ public class MainActivity extends Activity {
         }
 
         //Assign image to settings activity
-        Bitmap bmpImage = Bitmap.createBitmap(intColors, width, height, Bitmap.Config.ARGB_8888);
-        settingsActivity.setWhiteboardImage(bmpImage);
+        //Bitmap bmpImage = Bitmap.createBitmap(intColors, width, height, Bitmap.Config.ARGB_8888);
+        //settingsActivity.setWhiteboardImage(bmpImage);
 
         //Use the Settings Activity to get the regions
-        Intent intent = new Intent(this, SettingsActivity.class);
+        Intent intent = new Intent(this, settingsActivity.getClass());
+        intent.putExtra("COLORS", intColors);
         startActivityForResult(intent, GET_BOARD_COORDINATES_ID);
     }
 

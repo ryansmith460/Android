@@ -87,9 +87,6 @@ public class RegionSelectionActivity extends Activity {
 
     private int[] getRegions() {
 
-
-
-        //int[] regionStub = {67, 78};
         return regions;
     }
 
@@ -138,12 +135,6 @@ public class RegionSelectionActivity extends Activity {
 
     //
 
-
-
-    // Defines the one method for the interface, which is called when the View is long-clicked
-    //public boolean onLongClick(View v) {
-
-
     View.OnTouchListener listener = new View.OnTouchListener() {
 
         public boolean onTouch(View whiteboardImageView, MotionEvent e) {
@@ -154,9 +145,6 @@ public class RegionSelectionActivity extends Activity {
                         //store the X value when the user's finger was pressed down
                         m_downXValue = e.getX();
                         m_downYValue = e.getY();
-                        Log.d("down values", "down x:" +m_downXValue);
-                        Log.d("down values", "down y:" +m_downYValue);
-
                         break;
                     }
                     case MotionEvent.ACTION_UP: {
