@@ -193,9 +193,14 @@ public class MainActivity extends Activity {
             throw new ArrayStoreException();
         }
 
-        //Convert to bitmap
+        /*//Convert to bitmap
         for (int intIndex = 0; intIndex < numImagePts - 2; intIndex = intIndex + 3) {
             intColors[intIndex / 3] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[intIndex + 1] << 8) | imageIntegers[intIndex + 2];
+        }*/
+
+        //Convert to bitmap
+        for (int intIndex = 0; intIndex < numImagePts/3; intIndex = intIndex + 1) {
+            intColors[intIndex] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[numImagePts/3+intIndex ] << 8) | imageIntegers[2*numImagePts/3+intIndex];
         }
 
         //Use the Region Selection Activity to get the regions
