@@ -139,8 +139,6 @@ public class SettingsActivity extends Activity {
                         //store the X value when the user's finger was pressed down
                         m_downXValue = e.getX();
                         m_downYValue = e.getY();
-                        //Log.d("down values", "down x:" + m_downXValue);
-                        //Log.d("down values", "down y:" +m_downYValue);
 
                         break;
                     }
@@ -154,7 +152,6 @@ public class SettingsActivity extends Activity {
                 }
             }
             return true;
-
         }
     };
 

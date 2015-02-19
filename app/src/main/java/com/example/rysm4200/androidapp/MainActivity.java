@@ -132,8 +132,9 @@ public class MainActivity extends Activity {
         bT.startSaving();
 
         //Wait until image is ready, then get the image
+        //COMMENTED OUT HERE
         //while (bT.getSaveStatus() == true) ;
-        imageBytes = bT.getImage();
+        //imageBytes = bT.getImage();
 
         byte tempValue;
         //Convert negative values to positives
@@ -175,8 +176,9 @@ public class MainActivity extends Activity {
         bT.startSaving();
 
         //Wait until image is ready, then get the image
-        while (bT.getSaveStatus() == true) ;
-        imageBytes = bT.getImage();
+        //COMMENTED OUT HERE
+        //while (bT.getSaveStatus() == true) ;
+        //imageBytes = bT.getImage();
 
         byte tempValue;
         //Convert negative values to positives
