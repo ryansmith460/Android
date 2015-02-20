@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.graphics.Rect;
 
 /**
  * Created by clairerichardson on 2/17/15.

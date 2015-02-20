@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -15,6 +16,8 @@ import android.graphics.Bitmap;
 import java.util.UUID;
 
 public class MainActivity extends Activity {
+    boolean debug = true;
+
     //Bluetooth
     private BluetoothAdapter adapter = null;
     private BluetoothSocket socket = null;
@@ -61,35 +64,30 @@ public class MainActivity extends Activity {
         //Set up Bluetooth Communication
         adapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice bTDevice = adapter.getRemoteDevice(address);
-
-        try
-        {
-            socket = bTDevice.createRfcommSocketToServiceRecord(bT_UUID);
-        }
-        catch (IOException e) {}
-
-        adapter.cancelDiscovery();
-
-        // Establish the connection.  This will block until it connects.
-        try
-        {
-            socket.connect();
-        }
-        catch (IOException e)
-        {
-            try
-            {
-                socket.close();
+        if(!debug) {
+            try {
+                socket = bTDevice.createRfcommSocketToServiceRecord(bT_UUID);
+            } catch (IOException e) {
             }
-            catch (IOException e2) {}
+
+            adapter.cancelDiscovery();
+
+            // Establish the connection.  This will block until it connects.
+            try {
+                socket.connect();
+            } catch (IOException e) {
+                try {
+                    socket.close();
+                } catch (IOException e2) {
+                }
+            }
+
+            bT = new BluetoothThread();
+
+            if (!bT.InitBluetoothThread(socket, numImagePts)) {
+                //Display an error message
+            }
         }
-
-        bT = new BluetoothThread();
-
-        if(!bT.InitBluetoothThread(socket, numImagePts)) {
-            //Display an error message
-        }
-
         //Create Region selection activity
         regionSelection = new RegionSelectionActivity();
         regionSelection.Init(GET_COORDINATES_ID);
@@ -124,18 +122,21 @@ public class MainActivity extends Activity {
     //Settings button handler
     public void settingsButtonHandler(View view) {
         //Get an image of the board
-        if (bluetoothRunning == false)
-        {
-            bT.start();
-            bluetoothRunning = true;
+        if(!debug) {
+            if (bluetoothRunning == false) {
+                bT.start();
+                bluetoothRunning = true;
+            }
+            bT.startSaving();
+
+            //Wait until image is ready, then get the image
+            //COMMENTED OUT HERE
+            while (bT.getSaveStatus() == true) ;
+            imageBytes = bT.getImage();
         }
-        bT.startSaving();
-
-        //Wait until image is ready, then get the image
-        //COMMENTED OUT HERE
-        //while (bT.getSaveStatus() == true) ;
-        //imageBytes = bT.getImage();
-
+        else {
+            //assign imageBytes the saved picture values
+        }
         byte tempValue;
         //Convert negative values to positives
         for (int i = 0; i < imageBytes.length; i++) {
@@ -169,18 +170,21 @@ public class MainActivity extends Activity {
     //Region selection button handler
     public void regionSelectionButtonHandler(View view) {
         //Get an image of the board
-        if (bluetoothRunning == false)
-        {
-            bT.start();
-            bluetoothRunning = true;
+        if(!debug) {
+            if (bluetoothRunning == false) {
+                bT.start();
+                bluetoothRunning = true;
+            }
+            bT.startSaving();
+
+            //Wait until image is ready, then get the image
+            //COMMENTED OUT HERE
+            while (bT.getSaveStatus() == true) ;
+            imageBytes = bT.getImage();
         }
-        bT.startSaving();
-
-        //Wait until image is ready, then get the image
-        //COMMENTED OUT HERE
-        //while (bT.getSaveStatus() == true) ;
-        //imageBytes = bT.getImage();
-
+        else {
+            //assign imageBytes saved picture values
+        }
         byte tempValue;
         //Convert negative values to positives
         for (int i = 0; i < imageBytes.length; i++) {
@@ -231,15 +235,21 @@ public class MainActivity extends Activity {
 
     public void eraseAllButtonHandler(View view)
     {
-        if (bluetoothRunning == false)
-        {
-            bT.start();
-            bluetoothRunning = true;
+        if(!debug) {
+            if (bluetoothRunning == false) {
+                bT.start();
+                bluetoothRunning = true;
+            }
         }
         eraseAll = true;
         if (eraseAll == true)
         {
-            //bT.sendData(eraseAllCode);
+            if(!debug) {
+                //bT.sendData(eraseAllCode);
+            }
+            else {
+                Log.i("EraseAll", "The command for erasing all writing has been sent.");
+            }
             eraseAll = false;
         }
 
@@ -248,13 +258,20 @@ public class MainActivity extends Activity {
     public void emergencyStopButtonHandler(View view) {
         if (bluetoothRunning == false)
         {
-            bT.start();
-            bluetoothRunning = true;
+            if(!debug) {
+                bT.start();
+                bluetoothRunning = true;
+            }
         }
         emergencyStop = true;
         if (emergencyStop == true)
         {
-            //bT.sendData(emergencyStopCode);
+            if(!debug) {
+                //bT.sendData(emergencyStopCode);
+            }
+            else {
+                Log.i("EmergencyStop", "The command for emergency stop has been sent.");
+            }
             emergencyStop = false;
         }
     }
