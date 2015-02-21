@@ -1,25 +1,23 @@
 package com.example.rysm4200.androidapp;
 
+import java.io.FileNotFoundException;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.util.Log;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
 import android.view.View;
 import android.widget.ImageView;
-import android.content.ClipData;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ColorDrawable;
-import android.view.DragEvent;
-import android.content.ClipDescription;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Point;
-import android.view.View.OnLongClickListener;
 import android.view.MotionEvent;
+import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 
 
 public class RegionSelectionActivity extends Activity {
@@ -33,12 +31,22 @@ public class RegionSelectionActivity extends Activity {
     float lowY = 0;
     float highX = 0;
     float highY = 0;
-    boolean touchEvent = false;
     int numberOfRegions = 0;
     public int regions[] = new int[64];
 
+    Uri source;
 
-    //
+    Bitmap bitmapMaster;
+    Canvas canvasMaster;
+    Bitmap bitmapDrawingPane;
+    Canvas canvasDrawingPane;
+
+    projectPt startPt;
+
+    ImageView imageResult, imageDrawingPane;
+
+    final int RQS_IMAGE1 = 1;
+
     int GET_COORDINATES_ID;
     ImageView whiteboardImageView;
 
@@ -46,6 +54,7 @@ public class RegionSelectionActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_region_selection);
+
         whiteboardImageView = (ImageView)findViewById(R.id.whiteboardImageView);
         Bundle extras = getIntent().getExtras();
         int [] intColors  = extras.getIntArray("COLORS");
@@ -55,8 +64,10 @@ public class RegionSelectionActivity extends Activity {
 
         whiteboardImageView.setImageBitmap(bmpImage);
         whiteboardImageView.setOnTouchListener(listener);
-    }
 
+        imageResult = (ImageView)findViewById(R.id.result);
+        imageDrawingPane = (ImageView)findViewById(R.id.drawingpane);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -133,31 +144,132 @@ public class RegionSelectionActivity extends Activity {
         numberOfRegions++;
     }
 
-    //
-
     View.OnTouchListener listener = new View.OnTouchListener() {
 
         public boolean onTouch(View whiteboardImageView, MotionEvent e) {
-            touchEvent = true;
-            if (touchEvent == true) {
-                switch (e.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        //store the X value when the user's finger was pressed down
-                        m_downXValue = e.getX();
-                        m_downYValue = e.getY();
-                        break;
-                    }
-                    case MotionEvent.ACTION_UP: {
-                        //store the X value when the user's finger was pressed down
-                        m_upXValue = e.getX();
-                        m_upYValue = e.getY();
 
-                        break;
-                    }
+            int whiteX = whiteboardImageView.getWidth();
+            int whiteY = whiteboardImageView.getHeight();
+            bitmapDrawingPane = Bitmap.createBitmap(whiteX, whiteY, Bitmap.Config.ARGB_8888);
+            canvasDrawingPane = new Canvas(bitmapDrawingPane);
+
+            int action = e.getAction();
+            int x = (int) e.getX();
+            int y = (int) e.getY();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN: {
+                    //store the X value when the user's finger was pressed down
+                    m_downXValue = e.getX();
+                    m_downYValue = e.getY();
+                    startPt = projectXY((ImageView)whiteboardImageView, bitmapDrawingPane, x, y);
+                    break;
+                }
+                case MotionEvent.ACTION_MOVE:
+                    drawOnRectProjectedBitMap((ImageView)whiteboardImageView, bitmapDrawingPane, x, y);
+                    break;
+                case MotionEvent.ACTION_UP: {
+                    //store the X value when the user's finger was pressed down
+                    m_upXValue = e.getX();
+                    m_upYValue = e.getY();
+                    drawOnRectProjectedBitMap((ImageView)whiteboardImageView, bitmapDrawingPane, x, y);
+                    finalizeDrawing();
+                    break;
                 }
             }
             return true;
-
         }
     };
+
+    class projectPt{
+        int x;
+        int y;
+
+        projectPt(int tx, int ty){
+            x = tx;
+            y = ty;
+        }
+    }
+
+    private projectPt projectXY(ImageView iv, Bitmap bm, int x, int y){
+        if(x<0 || y<0 || x > iv.getWidth() || y > iv.getHeight()){
+            //outside ImageView
+            return null;
+        }else{
+            int projectedX = (int)((double)x * ((double)bm.getWidth()/(double)iv.getWidth()));
+            int projectedY = (int)((double)y * ((double)bm.getHeight()/(double)iv.getHeight()));
+
+            return new projectPt(projectedX, projectedY);
+        }
+    }
+
+    private void drawOnRectProjectedBitMap(ImageView iv, Bitmap bm, int x, int y){
+        if(x<0 || y<0 || x > iv.getWidth() || y > iv.getHeight()){
+            //outside ImageView
+            return;
+        }else{
+            int projectedX = (int)((double)x * ((double)bm.getWidth()/(double)iv.getWidth()));
+            int projectedY = (int)((double)y * ((double)bm.getHeight()/(double)iv.getHeight()));
+
+            //clear canvasDrawingPane
+            canvasDrawingPane.drawColor(Color.TRANSPARENT, Mode.CLEAR);
+
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.RED);
+            paint.setStrokeWidth(3);
+            canvasDrawingPane.drawRect(startPt.x, startPt.y, projectedX, projectedY, paint);
+            imageDrawingPane.setImageBitmap(bitmapDrawingPane);
+        }
+    }
+
+    private void finalizeDrawing(){
+        canvasMaster.drawBitmap(bitmapDrawingPane, 0, 0, null);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Bitmap tempBitmap;
+
+        if(resultCode == RESULT_OK){
+            switch (requestCode){
+                case RQS_IMAGE1:
+                    source = data.getData();
+
+                    try {
+                        //tempBitmap is Immutable bitmap,
+                        //cannot be passed to Canvas constructor
+                        tempBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(source));
+
+                        Config config;
+                        if(tempBitmap.getConfig() != null){
+                            config = tempBitmap.getConfig();
+                        }else{
+                            config = Config.ARGB_8888;
+                        }
+
+                        //bitmapMaster is Mutable bitmap
+                        bitmapMaster = Bitmap.createBitmap(tempBitmap.getWidth(), tempBitmap.getHeight(), config);
+
+                        canvasMaster = new Canvas(bitmapMaster);
+                        canvasMaster.drawBitmap(tempBitmap, 0, 0, null);
+
+                        imageResult.setImageBitmap(bitmapMaster);
+
+                        //Create bitmap of same size for drawing
+                        bitmapDrawingPane = Bitmap.createBitmap(tempBitmap.getWidth(), tempBitmap.getHeight(), Config.ARGB_8888);
+                        canvasDrawingPane = new Canvas(bitmapDrawingPane);
+                        imageDrawingPane.setImageBitmap(bitmapDrawingPane);
+
+
+                    } catch (FileNotFoundException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                    break;
+            }
+        }
+    }
 }

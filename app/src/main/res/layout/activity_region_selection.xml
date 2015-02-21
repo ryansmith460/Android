@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -42,24 +43,38 @@
         android:onClick="saveSelectionButtonHandler" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:layout_below="@+id/saveSelectionButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="99dp" />
-
-    <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/whiteboardImageView"
-        android:layout_below="@+id/saveSelectionButton"
         android:layout_alignRight="@+id/saveSelectionButton"
         android:layout_alignEnd="@+id/saveSelectionButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:longClickable="true"
+        android:layout_below="@+id/saveSelectionButton"
+        android:layout_above="@+id/eraseButton" />
+
+    <ImageView
+       android:id="@+id/result"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:adjustViewBounds="true"
+       android:background="@android:color/background_dark"
+       android:scaleType="centerInside"
         android:layout_above="@+id/eraseButton"
-        android:longClickable="true" />
+        android:layout_alignTop="@+id/whiteboardImageView"
+        android:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/drawingpane"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:layout_alignLeft="@id/result"
+        android:layout_alignRight="@id/result"
+        android:layout_alignTop="@+id/whiteboardImageView"
+        android:layout_above="@+id/eraseButton"
+        android:visibility="visible" />
 
 </RelativeLayout>
