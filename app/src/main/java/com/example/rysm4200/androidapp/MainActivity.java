@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.RadialGradient;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import android.view.View;
 import android.graphics.Bitmap;
 import java.util.UUID;
+import android.widget.CheckBox;
 
 public class MainActivity extends Activity {
     boolean debug = false;
@@ -29,14 +31,14 @@ public class MainActivity extends Activity {
     //Hard-coded image size
     int width = 320;
     int height = 240;
-    int downSample = 4;
-    int numImagePts = width * height * 3 / downSample;
-
-    //Image variables
     int alpha = 255;
-    int[] imageIntegers = new int[numImagePts];
-    byte[] imageBytes = new byte[numImagePts];
-    int[] intColors = new int[numImagePts / 3];
+
+    int downSample;
+    int numImagePts;
+
+    int[] imageIntegers;
+    byte[] imageBytes;
+    int[] intColors;
 
     //Region Selection Activity
     RegionSelectionActivity regionSelection;
@@ -127,6 +129,9 @@ public class MainActivity extends Activity {
 
     //Settings button handler
     public void settingsButtonHandler(View view) {
+        //Set up the image arrays
+        Boolean isDownsampled = createImageArrays();
+
         //Get an image of the board
         if(!debug) {
             bT = new BluetoothThread();
@@ -134,7 +139,14 @@ public class MainActivity extends Activity {
             bT.start();
             bT.startSaving();
 
-            bT.sendData(requestImageCode);
+            int code;
+            if(isDownsampled)
+                code =  0x01 << 4 | (int)requestImageCode[0];
+            else
+                code =  (int)requestImageCode[0];
+            byte [] imageRequestCode = {(byte)code};
+
+            bT.sendData(imageRequestCode);
             //Wait until image is ready, then get the image
             while (bT.getSaveStatus() == true);
             imageBytes = bT.getImage();
@@ -163,17 +175,25 @@ public class MainActivity extends Activity {
         //Use the Settings Activity to get the regions
         Intent intent = new Intent(this, settingsActivity.getClass());
         intent.putExtra("COLORS", intColors);
-        intent.putExtra("WIDTH", width/downSample*2);
-        intent.putExtra("HEIGHT", height/downSample*2);
+
+        if(isDownsampled) {
+            intent.putExtra("WIDTH", width / 2);
+            intent.putExtra("HEIGHT", height / 2);
+        }
+        else
+        {
+            intent.putExtra("WIDTH", width);
+            intent.putExtra("HEIGHT", height);
+        }
 
         startActivityForResult(intent, GET_BOARD_COORDINATES_ID);
     }
 
     //Region selection button handler
     public void regionSelectionButtonHandler(View view) {
-        //Get an image of the board
-        //if (bluetoothRunning == false)
-        //{
+
+        //Set up the image arrays
+        Boolean isDownsampled = createImageArrays();
         if(!debug) {
             bT = new BluetoothThread();
             bT.InitBluetoothThread(socket, numImagePts);
@@ -182,7 +202,14 @@ public class MainActivity extends Activity {
             //}
             bT.startSaving();
 
-            bT.sendData(requestImageCode);
+            int code;
+            if(isDownsampled)
+                code =  0x01 << 4 | (int)requestImageCode[0];
+            else
+                code =  (int)requestImageCode[0];
+            byte [] imageRequestCode = {(byte)code};
+
+            bT.sendData(imageRequestCode);
 
             //Wait until image is ready, then get the image
             //COMMENTED OUT HERE
@@ -218,8 +245,16 @@ public class MainActivity extends Activity {
         //Use the Region Selection Activity to get the regions
         Intent intent = new Intent(this, regionSelection.getClass());
         intent.putExtra("COLORS", intColors);
-        intent.putExtra("WIDTH", width/downSample*2);
-        intent.putExtra("HEIGHT", height/downSample*2);
+
+        if(isDownsampled) {
+            intent.putExtra("WIDTH", width / 2);
+            intent.putExtra("HEIGHT", height / 2);
+        }
+        else
+        {
+            intent.putExtra("WIDTH", width);
+            intent.putExtra("HEIGHT", height);
+        }
         startActivityForResult(intent, GET_COORDINATES_ID);
     }
 
@@ -312,4 +347,25 @@ public class MainActivity extends Activity {
         }
         bT = null;
     }
+
+
+    private Boolean createImageArrays()
+    {
+        CheckBox cb = (CheckBox)findViewById(R.id.cbDownSample);
+        if(cb.isChecked() == true)
+            downSample = 4;
+        else
+            downSample = 1;
+
+        numImagePts = width * height * 3 / downSample;
+
+
+        imageIntegers = new int[numImagePts];
+        imageBytes = new byte[numImagePts];
+        intColors = new int[numImagePts / 3];
+
+        return cb.isChecked();
+    }
+
+
 }
