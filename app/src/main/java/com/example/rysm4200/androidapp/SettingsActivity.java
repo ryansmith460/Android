@@ -26,7 +26,7 @@ public class SettingsActivity extends Activity {
     float highX = 0;
     float highY = 0;
     boolean touchEvent = false;
-    public int whiteboard [] = new int[4];
+    public byte whiteboard [] = new byte[8];
 
     int GET_BOARD_COORDINATES_ID;
     ImageView settingsWhiteboardImageView;
@@ -38,9 +38,11 @@ public class SettingsActivity extends Activity {
         settingsWhiteboardImageView = (ImageView)findViewById(R.id.settingsWhiteboardImageView);
         Bundle extras = getIntent().getExtras();
         int [] intColors  = extras.getIntArray("COLORS");
+        int width = extras.getInt("WIDTH");
+        int height = extras.getInt("HEIGHT");
 
         //Assign image to Region selection activity
-        Bitmap bmpImage = Bitmap.createBitmap(intColors, 320, 240, Bitmap.Config.ARGB_8888);
+        Bitmap bmpImage = Bitmap.createBitmap(intColors, width, height, Bitmap.Config.ARGB_8888);
 
         settingsWhiteboardImageView.setImageBitmap(bmpImage);
         settingsWhiteboardImageView.setOnTouchListener(listener);
@@ -79,17 +81,10 @@ public class SettingsActivity extends Activity {
         GET_BOARD_COORDINATES_ID = get_board_coordinates_id;
     }
 
-    public void setWhiteboardImage(Bitmap bmpImage) {
-    }
-
-    private int[] getWhiteboardCoordinates() {
-
-        return whiteboard;
-    }
 
     public void exitSaveButtonHandler(View view) {
         Intent data = new Intent();
-        data.putExtra("Coordinates", getWhiteboardCoordinates());
+        data.putExtra("Coordinates", whiteboard);
         setResult(RESULT_OK, data);
         finish();
     }
@@ -123,19 +118,22 @@ public class SettingsActivity extends Activity {
             lowY = m_upYValue;
             highY = m_downYValue;
         }
-        whiteboard[0] = (int)lowX;
-        whiteboard[1] = (int)lowY;
-        whiteboard[2] = (int)highX;
-        whiteboard[3] = (int)highY;
+        //Report relative to imageview
+        int [] imgViewLocation = new int [2];
+        settingsWhiteboardImageView.getLocationOnScreen(imgViewLocation);
+
+        whiteboard[0] = (byte)((((int)(lowX-imgViewLocation[0]))&0xFF00)>> 8);
+        whiteboard[1] =   (byte)((int)(lowX-imgViewLocation[0])&0xFF);
+        whiteboard[2] =  (byte)((((int)(lowY-imgViewLocation[1]))&0xFF00)>> 8);
+        whiteboard[3] = (byte)((int)(lowY-imgViewLocation[1])&0xFF);
+        whiteboard[4] =  (byte)((((int)(highX-imgViewLocation[0]))&0xFF00)>> 8);
+        whiteboard[5] = (byte)((int)(highX-imgViewLocation[0])&0xFF);
+        whiteboard[6] = (byte)((((int)(highY-imgViewLocation[1]))&0xFF00)>> 8);
+        whiteboard[7] = (byte)((int)(highY-imgViewLocation[1])&0xFF);
     }
-
-    //
-
-
 
     // Defines the one method for the interface, which is called when the View is long-clicked
     //public boolean onLongClick(View v) {
-
 
     View.OnTouchListener listener = new View.OnTouchListener() {
 

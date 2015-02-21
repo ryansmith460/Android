@@ -32,7 +32,7 @@ public class RegionSelectionActivity extends Activity {
     float highX = 0;
     float highY = 0;
     int numberOfRegions = 0;
-    public int regions[] = new int[64];
+    public byte regions[] = new byte[128];
 
     Uri source;
 
@@ -58,9 +58,11 @@ public class RegionSelectionActivity extends Activity {
         whiteboardImageView = (ImageView)findViewById(R.id.whiteboardImageView);
         Bundle extras = getIntent().getExtras();
         int [] intColors  = extras.getIntArray("COLORS");
+        int width = extras.getInt("WIDTH");
+        int height = extras.getInt("HEIGHT");
 
         //Assign image to Region selection activity
-        Bitmap bmpImage = Bitmap.createBitmap(intColors, 320, 240, Bitmap.Config.ARGB_8888);
+        Bitmap bmpImage = Bitmap.createBitmap(intColors, width, height, Bitmap.Config.ARGB_8888);
 
         whiteboardImageView.setImageBitmap(bmpImage);
         whiteboardImageView.setOnTouchListener(listener);
@@ -68,6 +70,7 @@ public class RegionSelectionActivity extends Activity {
         imageResult = (ImageView)findViewById(R.id.result);
         imageDrawingPane = (ImageView)findViewById(R.id.drawingpane);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -96,14 +99,24 @@ public class RegionSelectionActivity extends Activity {
         GET_COORDINATES_ID = get_coordinates_id;
     }
 
-    private int[] getRegions() {
-
-        return regions;
-    }
 
     public void eraseButtonHandler(View view) {
+        //Only send data for the nRegions that were selected
+        byte resultRegions[] = new byte[numberOfRegions*8];
+
+        for (int i = 0; i < numberOfRegions; i++) {
+            resultRegions[8*i] = regions[8*i];
+            resultRegions[8*i+1] = regions[8*i+1];
+            resultRegions[8*i+2] = regions[8*i+2];
+            resultRegions[8*i+3] = regions[8*i+3];
+            resultRegions[8*i+4] = regions[8*i+4];
+            resultRegions[8*i+5] = regions[8*i+5];
+            resultRegions[8*i+6] = regions[8*i+6];
+            resultRegions[8*i+7] = regions[8*i+7];
+        }
         Intent data = new Intent();
-        data.putExtra("Coordinates", getRegions());
+        data.putExtra("Coordinates", resultRegions);
+        data.putExtra("nRegions", numberOfRegions);
         setResult(RESULT_OK, data);
         finish();
     }
@@ -137,10 +150,18 @@ public class RegionSelectionActivity extends Activity {
             lowY = m_upYValue;
             highY = m_downYValue;
         }
-        regions[(4*numberOfRegions)] = (int)lowX;
-        regions[(4*numberOfRegions) + 1] = (int)lowY;
-        regions[(4*numberOfRegions) + 2] = (int)highX;
-        regions[(4*numberOfRegions) + 3] = (int)highY;
+        //Report relative to imageview
+        int [] imgViewLocation = new int [2];
+        whiteboardImageView.getLocationOnScreen(imgViewLocation);
+
+        regions[(8*numberOfRegions)] = (byte)((((int)(lowX-imgViewLocation[0]))&0xFF00)>> 8);
+        regions[(8*numberOfRegions)+1] =  (byte)((int)(lowX-imgViewLocation[0])&0xFF);
+        regions[(8*numberOfRegions) + 2] = (byte)((((int)(lowY-imgViewLocation[1]))&0xFF00)>> 8);
+        regions[(8*numberOfRegions) + 3] = (byte)((int)(lowY-imgViewLocation[1])&0xFF);
+        regions[(8*numberOfRegions) + 4] = (byte)((((int)(highX-imgViewLocation[0]))&0xFF00)>> 8);
+        regions[(8*numberOfRegions) + 5] = (byte)((int)(highX-imgViewLocation[0])&0xFF);
+        regions[(8*numberOfRegions) + 6] = (byte)((((int)(highY-imgViewLocation[1]))&0xFF00)>> 8);
+        regions[(8*numberOfRegions) + 7] = (byte)((int)(highY-imgViewLocation[1])&0xFF);
         numberOfRegions++;
     }
 
@@ -177,6 +198,7 @@ public class RegionSelectionActivity extends Activity {
                 }
             }
             return true;
+
         }
     };
 

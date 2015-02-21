@@ -16,7 +16,7 @@ import android.graphics.Bitmap;
 import java.util.UUID;
 
 public class MainActivity extends Activity {
-    boolean debug = true;
+    boolean debug = false;
 
     //Bluetooth
     private BluetoothAdapter adapter = null;
@@ -29,7 +29,8 @@ public class MainActivity extends Activity {
     //Hard-coded image size
     int width = 320;
     int height = 240;
-    int numImagePts = width * height * 3;
+    int downSample = 4;
+    int numImagePts = width * height * 3 / downSample;
 
     //Image variables
     int alpha = 255;
@@ -45,13 +46,21 @@ public class MainActivity extends Activity {
     SettingsActivity settingsActivity;
     int GET_BOARD_COORDINATES_ID = 2;
 
+    //New Board Region
+    byte[] boardRegionCode = {0};
     //Erase All
     boolean eraseAll = false;
-    int eraseAllCode = 1;
+    byte[] eraseAllCode = {1};
 
     //Emergency Stop
     boolean emergencyStop = true;
-    int emergencyStopCode = 2;
+    byte[] emergencyStopCode = {2};
+
+    //New Regions
+    byte[] regionSelectionCode = {3};
+
+    //request Image
+    byte[] requestImageCode = {5};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +73,7 @@ public class MainActivity extends Activity {
         //Set up Bluetooth Communication
         adapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice bTDevice = adapter.getRemoteDevice(address);
-        if(!debug) {
+        if (!debug) {
             try {
                 socket = bTDevice.createRfcommSocketToServiceRecord(bT_UUID);
             } catch (IOException e) {
@@ -81,21 +90,18 @@ public class MainActivity extends Activity {
                 } catch (IOException e2) {
                 }
             }
-
-            bT = new BluetoothThread();
-
-            if (!bT.InitBluetoothThread(socket, numImagePts)) {
-                //Display an error message
-            }
         }
-        //Create Region selection activity
-        regionSelection = new RegionSelectionActivity();
-        regionSelection.Init(GET_COORDINATES_ID);
 
-        //Create Settings Activity
-        settingsActivity = new SettingsActivity();
-        settingsActivity.Init(GET_BOARD_COORDINATES_ID);
+
+            //Create Region selection activity
+            regionSelection = new RegionSelectionActivity();
+            regionSelection.Init(GET_COORDINATES_ID);
+
+            //Create Settings Activity
+            settingsActivity = new SettingsActivity();
+            settingsActivity.Init(GET_BOARD_COORDINATES_ID);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -123,20 +129,17 @@ public class MainActivity extends Activity {
     public void settingsButtonHandler(View view) {
         //Get an image of the board
         if(!debug) {
-            if (bluetoothRunning == false) {
-                bT.start();
-                bluetoothRunning = true;
-            }
+            bT = new BluetoothThread();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
             bT.startSaving();
 
+            bT.sendData(requestImageCode);
             //Wait until image is ready, then get the image
-            //COMMENTED OUT HERE
-            while (bT.getSaveStatus() == true) ;
+            while (bT.getSaveStatus() == true);
             imageBytes = bT.getImage();
         }
-        else {
-            //assign imageBytes the saved picture values
-        }
+
         byte tempValue;
         //Convert negative values to positives
         for (int i = 0; i < imageBytes.length; i++) {
@@ -148,43 +151,45 @@ public class MainActivity extends Activity {
         }
 
         //Check width and height are consistent with array size
-        if ((numImagePts / 3) != (width * height)) {
+        if ((numImagePts / 3) != (width * height / downSample)) {
             throw new ArrayStoreException();
         }
 
         //Convert to bitmap
-        for (int intIndex = 0; intIndex < numImagePts - 2; intIndex = intIndex + 3) {
-            intColors[intIndex / 3] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[intIndex + 1] << 8) | imageIntegers[intIndex + 2];
+        for (int intIndex = 0; intIndex < numImagePts/3; intIndex = intIndex + 1) {
+            intColors[intIndex] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[numImagePts/3+intIndex ] << 8) | imageIntegers[2*numImagePts/3+intIndex];
         }
-
-        //Assign image to settings activity
-        //Bitmap bmpImage = Bitmap.createBitmap(intColors, width, height, Bitmap.Config.ARGB_8888);
-        //settingsActivity.setWhiteboardImage(bmpImage);
 
         //Use the Settings Activity to get the regions
         Intent intent = new Intent(this, settingsActivity.getClass());
         intent.putExtra("COLORS", intColors);
+        intent.putExtra("WIDTH", width/downSample*2);
+        intent.putExtra("HEIGHT", height/downSample*2);
+
         startActivityForResult(intent, GET_BOARD_COORDINATES_ID);
     }
 
     //Region selection button handler
     public void regionSelectionButtonHandler(View view) {
         //Get an image of the board
+        //if (bluetoothRunning == false)
+        //{
         if(!debug) {
-            if (bluetoothRunning == false) {
-                bT.start();
-                bluetoothRunning = true;
-            }
+            bT = new BluetoothThread();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
+            //    bluetoothRunning = true;
+            //}
             bT.startSaving();
+
+            bT.sendData(requestImageCode);
 
             //Wait until image is ready, then get the image
             //COMMENTED OUT HERE
             while (bT.getSaveStatus() == true) ;
             imageBytes = bT.getImage();
         }
-        else {
-            //assign imageBytes saved picture values
-        }
+
         byte tempValue;
         //Convert negative values to positives
         for (int i = 0; i < imageBytes.length; i++) {
@@ -196,7 +201,7 @@ public class MainActivity extends Activity {
         }
 
         //Check width and height are consistent with array size
-        if ((numImagePts / 3) != (width * height)) {
+        if ((numImagePts / 3) != (width * height / downSample)) {
             throw new ArrayStoreException();
         }
 
@@ -213,6 +218,8 @@ public class MainActivity extends Activity {
         //Use the Region Selection Activity to get the regions
         Intent intent = new Intent(this, regionSelection.getClass());
         intent.putExtra("COLORS", intColors);
+        intent.putExtra("WIDTH", width/downSample*2);
+        intent.putExtra("HEIGHT", height/downSample*2);
         startActivityForResult(intent, GET_COORDINATES_ID);
     }
 
@@ -223,23 +230,52 @@ public class MainActivity extends Activity {
         {
             if(resultCode == RESULT_OK)
             {
-                int [] coordinates = data.getIntArrayExtra("Coordinates");
+                byte [] coordinates = data.getByteArrayExtra("Coordinates");
+                int nRegions = data.getIntExtra("nRegions", 0);
                 //Send the coordinates to the Camera module
-                byte [] test = {1,2,3,4};
-                if (!bT.sendData(test)) {
-                    //Display error message
+
+                int code = nRegions << 4 | 0x03;
+                byte [] regionCode = {(byte)code};
+
+                if(!debug) {
+                    bT.sendData(regionCode);
+
+                    if (!bT.sendData(coordinates)) {
+                        //Display error message
+                    }
                 }
             }
+        }
+
+        if(requestCode == GET_BOARD_COORDINATES_ID)
+        {
+            if(resultCode == RESULT_OK)
+            {
+                byte [] coordinates = data.getByteArrayExtra("Coordinates");
+                //Send the coordinates to the Camera module
+
+                if(!debug) {
+                    bT.sendData(boardRegionCode);
+
+                    if (!bT.sendData(coordinates)) {
+                        //Display error message
+                    }
+                }
+            }
+        }
+
+        //close out the thread
+        if(!debug) {
+            bT = null;
         }
     }
 
     public void eraseAllButtonHandler(View view)
     {
         if(!debug) {
-            if (bluetoothRunning == false) {
-                bT.start();
-                bluetoothRunning = true;
-            }
+            bT = new BluetoothThread();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
         }
         eraseAll = true;
         if (eraseAll == true)
@@ -252,20 +288,20 @@ public class MainActivity extends Activity {
             }
             eraseAll = false;
         }
+        bT = null;
 
     }
 
     public void emergencyStopButtonHandler(View view) {
-        if (bluetoothRunning == false)
-        {
-            if(!debug) {
-                bT.start();
-                bluetoothRunning = true;
-            }
+        if(!debug) {
+            bT = new BluetoothThread();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
         }
         emergencyStop = true;
         if (emergencyStop == true)
         {
+           // bT.sendData(emergencyStopCode);
             if(!debug) {
                 //bT.sendData(emergencyStopCode);
             }
@@ -274,5 +310,6 @@ public class MainActivity extends Activity {
             }
             emergencyStop = false;
         }
+        bT = null;
     }
 }
