@@ -33,6 +33,7 @@ public class RegionSelectionActivity extends Activity {
     float highY = 0;
     int numberOfRegions = 0;
     public byte regions[] = new byte[128];
+    boolean firstPress = true;
 
     Uri source;
 
@@ -41,7 +42,7 @@ public class RegionSelectionActivity extends Activity {
     Bitmap bitmapDrawingPane;
     Canvas canvasDrawingPane;
 
-    projectPt startPt;
+    projectPt startPt, endPt;
 
     ImageView imageResult, imageDrawingPane;
 
@@ -70,7 +71,6 @@ public class RegionSelectionActivity extends Activity {
         imageResult = (ImageView)findViewById(R.id.result);
         imageDrawingPane = (ImageView)findViewById(R.id.drawingpane);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -169,31 +169,36 @@ public class RegionSelectionActivity extends Activity {
 
         public boolean onTouch(View whiteboardImageView, MotionEvent e) {
 
-            int whiteX = whiteboardImageView.getWidth();
-            int whiteY = whiteboardImageView.getHeight();
-            bitmapDrawingPane = Bitmap.createBitmap(whiteX, whiteY, Bitmap.Config.ARGB_8888);
-            canvasDrawingPane = new Canvas(bitmapDrawingPane);
+            if(firstPress) {
+                int whiteX = whiteboardImageView.getWidth();
+                int whiteY = whiteboardImageView.getHeight();
+                bitmapDrawingPane = Bitmap.createBitmap(whiteX, whiteY, Bitmap.Config.ARGB_8888);
+                canvasDrawingPane = new Canvas(bitmapDrawingPane);
+                bitmapMaster = Bitmap.createBitmap(whiteX, whiteY, Config.ARGB_8888);
+                canvasMaster = new Canvas(bitmapMaster);
+                firstPress = false;
+            }
 
             int action = e.getAction();
-            int x = (int) e.getX();
-            int y = (int) e.getY();
+            int xStart = (int) e.getX();
+            int yStart = (int) e.getY();
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
                     //store the X value when the user's finger was pressed down
                     m_downXValue = e.getX();
                     m_downYValue = e.getY();
-                    startPt = projectXY((ImageView)whiteboardImageView, bitmapDrawingPane, x, y);
+                    startPt = projectXY((ImageView)whiteboardImageView, bitmapDrawingPane, xStart, yStart);
                     break;
                 }
                 case MotionEvent.ACTION_MOVE:
-                    drawOnRectProjectedBitMap((ImageView)whiteboardImageView, bitmapDrawingPane, x, y);
+                    drawOnRectProjectedBitMap((ImageView)whiteboardImageView, bitmapDrawingPane, xStart, yStart);
                     break;
                 case MotionEvent.ACTION_UP: {
                     //store the X value when the user's finger was pressed down
                     m_upXValue = e.getX();
                     m_upYValue = e.getY();
-                    drawOnRectProjectedBitMap((ImageView)whiteboardImageView, bitmapDrawingPane, x, y);
-                    finalizeDrawing();
+                    drawOnRectProjectedBitMap((ImageView)whiteboardImageView, bitmapDrawingPane, xStart, yStart);
+                    finalizeDrawing((ImageView)whiteboardImageView, bitmapDrawingPane, xStart, yStart);
                     break;
                 }
             }
@@ -244,8 +249,20 @@ public class RegionSelectionActivity extends Activity {
         }
     }
 
-    private void finalizeDrawing(){
-        canvasMaster.drawBitmap(bitmapDrawingPane, 0, 0, null);
+    private void finalizeDrawing(ImageView iv, Bitmap bm, int x, int y){
+        if(x<0 || y<0 || x > iv.getWidth() || y > iv.getHeight()){
+            //outside ImageView
+            return;
+        }else {
+            int projectedX = (int) ((double) x * ((double) bm.getWidth() / (double) iv.getWidth()));
+            int projectedY = (int) ((double) y * ((double) bm.getHeight() / (double) iv.getHeight()));
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.RED);
+            paint.setStrokeWidth(3);
+            canvasMaster.drawRect(startPt.x, startPt.y, projectedX, projectedY, paint);
+            imageResult.setImageBitmap(bitmapMaster);
+        }
     }
 
     @Override
