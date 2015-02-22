@@ -316,14 +316,16 @@ public class MainActivity extends Activity {
         if (eraseAll == true)
         {
             if(!debug) {
-                //bT.sendData(eraseAllCode);
+                bT.sendData(eraseAllCode);
             }
             else {
                 Log.i("EraseAll", "The command for erasing all writing has been sent.");
             }
             eraseAll = false;
         }
-        bT = null;
+        if(!debug) {
+            bT=null;
+        }
 
     }
 
@@ -336,16 +338,17 @@ public class MainActivity extends Activity {
         emergencyStop = true;
         if (emergencyStop == true)
         {
-           // bT.sendData(emergencyStopCode);
             if(!debug) {
-                //bT.sendData(emergencyStopCode);
+                bT.sendData(emergencyStopCode);
             }
             else {
                 Log.i("EmergencyStop", "The command for emergency stop has been sent.");
             }
             emergencyStop = false;
         }
-        bT = null;
+        if(!debug) {
+            bT=null;
+        }
     }
 
 
