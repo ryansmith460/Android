@@ -1,32 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1">
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:id="@+id/settingslayout">>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Go Back without Saving"
         android:id="@+id/goBackButton"
-        android:onClick="goBackSettingsButtonHandler" />
-
-    <ImageView
-        android:layout_width="341dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/settingsWhiteboardImageView"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0.71"
-        android:clickable="true"
-        android:longClickable="true" />
+        android:onClick="goBackSettingsButtonHandler"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@+id/saveButton"
+        android:layout_toEndOf="@+id/saveButton" />
 
     <Button
         android:layout_width="149dp"
         android:layout_height="wrap_content"
         android:text="Save"
         android:id="@+id/saveButton"
-        android:layout_gravity="right"
-        android:onClick="saveButtonHandler" />
+        android:layout_gravity="end"
+        android:onClick="saveButtonHandler"
+        android:layout_alignBottom="@+id/goBackButton"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="160dp"
@@ -34,5 +35,33 @@
         android:text="Exit"
         android:id="@+id/exitSaveButton"
         android:onClick="exitSaveButtonHandler"
-        android:layout_gravity="right" />
-</LinearLayout>
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/drawingpane"
+        android:layout_alignEnd="@+id/drawingpane" />
+
+    <ImageView
+        android:id="@+id/settingsWhiteboardImageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/exitSaveButton"
+        android:layout_alignEnd="@+id/goBackButton"
+        android:longClickable="true"
+        android:layout_below="@+id/exitSaveButton"
+        android:visibility="visible"
+        android:adjustViewBounds="true"
+        android:layout_above="@+id/goBackButton" />
+
+    <ImageView
+        android:id="@+id/drawingpane"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#00ffffff"
+        android:scaleType="centerInside"
+        android:layout_alignTop="@+id/settingsWhiteboardImageView"
+        android:visibility="visible"
+        android:layout_above="@+id/goBackButton"
+        android:layout_alignRight="@+id/goBackButton"
+        android:adjustViewBounds="true"
+        android:layout_alignEnd="@+id/goBackButton" />
+
+</RelativeLayout>

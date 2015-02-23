@@ -19,7 +19,6 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
-
 public class RegionSelectionActivity extends Activity {
 
     //variables for motion events
@@ -34,6 +33,15 @@ public class RegionSelectionActivity extends Activity {
     int numberOfRegions = 0;
     public byte regions[] = new byte[128];
     boolean firstPress = true;
+    boolean selectionSaved = false;
+    boolean newSelection = false;
+    boolean save = false;
+    int storedX = 0;
+    int storedY = 0;
+    int startOutOfBoundsWidth = 0;
+    int startOutOfBoundsHeight = 0;
+    int endOutOfBoundsWidth = 0;
+    int endOutOfBoundsHeight = 0;
 
     Uri source;
 
@@ -42,7 +50,7 @@ public class RegionSelectionActivity extends Activity {
     Bitmap bitmapDrawingPane;
     Canvas canvasDrawingPane;
 
-    projectPt startPt, endPt;
+    projectPt startPt;
 
     ImageView imageResult, imageDrawingPane;
 
@@ -99,7 +107,6 @@ public class RegionSelectionActivity extends Activity {
         GET_COORDINATES_ID = get_coordinates_id;
     }
 
-
     public void eraseButtonHandler(View view) {
         //Only send data for the nRegions that were selected
         byte resultRegions[] = new byte[numberOfRegions*8];
@@ -130,39 +137,40 @@ public class RegionSelectionActivity extends Activity {
     //used to add region that is currently drawn
     public void saveSelectionButtonHandler(View view)
     {
-        if (m_downXValue < m_upXValue)
-        {
-            lowX = m_downXValue;
-            highX = m_upXValue;
-        }
-        else
-        {
-            lowX = m_upXValue;
-            highX = m_downXValue;
-        }
-        if (m_downYValue < m_upYValue)
-        {
-            lowY = m_downYValue;
-            highY = m_upYValue;
-        }
-        else
-        {
-            lowY = m_upYValue;
-            highY = m_downYValue;
-        }
-        //Report relative to imageview
-        int [] imgViewLocation = new int [2];
-        whiteboardImageView.getLocationOnScreen(imgViewLocation);
+        save = true;
+        drawOnRectProjectedBitMap((ImageView)whiteboardImageView, bitmapDrawingPane, storedX, storedY);
+        save = false;
+        if(newSelection) {
+            if (m_downXValue < m_upXValue) {
+                lowX = m_downXValue;
+                highX = m_upXValue;
+            } else {
+                lowX = m_upXValue;
+                highX = m_downXValue;
+            }
+            if (m_downYValue < m_upYValue) {
+                lowY = m_downYValue;
+                highY = m_upYValue;
+            } else {
+                lowY = m_upYValue;
+                highY = m_downYValue;
+            }
+            //Report relative to imageview
+            int[] imgViewLocation = new int[2];
+            whiteboardImageView.getLocationOnScreen(imgViewLocation);
 
-        regions[(8*numberOfRegions)] = (byte)((((int)(lowX-imgViewLocation[0]))&0xFF00)>> 8);
-        regions[(8*numberOfRegions)+1] =  (byte)((int)(lowX-imgViewLocation[0])&0xFF);
-        regions[(8*numberOfRegions) + 2] = (byte)((((int)(lowY-imgViewLocation[1]))&0xFF00)>> 8);
-        regions[(8*numberOfRegions) + 3] = (byte)((int)(lowY-imgViewLocation[1])&0xFF);
-        regions[(8*numberOfRegions) + 4] = (byte)((((int)(highX-imgViewLocation[0]))&0xFF00)>> 8);
-        regions[(8*numberOfRegions) + 5] = (byte)((int)(highX-imgViewLocation[0])&0xFF);
-        regions[(8*numberOfRegions) + 6] = (byte)((((int)(highY-imgViewLocation[1]))&0xFF00)>> 8);
-        regions[(8*numberOfRegions) + 7] = (byte)((int)(highY-imgViewLocation[1])&0xFF);
-        numberOfRegions++;
+            regions[(8 * numberOfRegions)] = (byte) ((((int) (lowX - imgViewLocation[0])) & 0xFF00) >> 8);
+            regions[(8 * numberOfRegions) + 1] = (byte) ((int) (lowX - imgViewLocation[0]) & 0xFF);
+            regions[(8 * numberOfRegions) + 2] = (byte) ((((int) (lowY - imgViewLocation[1])) & 0xFF00) >> 8);
+            regions[(8 * numberOfRegions) + 3] = (byte) ((int) (lowY - imgViewLocation[1]) & 0xFF);
+            regions[(8 * numberOfRegions) + 4] = (byte) ((((int) (highX - imgViewLocation[0])) & 0xFF00) >> 8);
+            regions[(8 * numberOfRegions) + 5] = (byte) ((int) (highX - imgViewLocation[0]) & 0xFF);
+            regions[(8 * numberOfRegions) + 6] = (byte) ((((int) (highY - imgViewLocation[1])) & 0xFF00) >> 8);
+            regions[(8 * numberOfRegions) + 7] = (byte) ((int) (highY - imgViewLocation[1]) & 0xFF);
+            numberOfRegions++;
+            newSelection = false;
+            selectionSaved = true;
+        }
     }
 
     View.OnTouchListener listener = new View.OnTouchListener() {
@@ -184,10 +192,14 @@ public class RegionSelectionActivity extends Activity {
             int yStart = (int) e.getY();
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
+                    if(selectionSaved) {
+                        finalizeDrawing((ImageView)whiteboardImageView, bitmapDrawingPane, storedX, storedY);
+                    }
                     //store the X value when the user's finger was pressed down
-                    m_downXValue = e.getX();
-                    m_downYValue = e.getY();
                     startPt = projectXY((ImageView)whiteboardImageView, bitmapDrawingPane, xStart, yStart);
+                    m_downXValue = startPt.x;
+                    m_downYValue = startPt.y;
+                    selectionSaved = false;
                     break;
                 }
                 case MotionEvent.ACTION_MOVE:
@@ -195,15 +207,16 @@ public class RegionSelectionActivity extends Activity {
                     break;
                 case MotionEvent.ACTION_UP: {
                     //store the X value when the user's finger was pressed down
-                    m_upXValue = e.getX();
-                    m_upYValue = e.getY();
                     drawOnRectProjectedBitMap((ImageView)whiteboardImageView, bitmapDrawingPane, xStart, yStart);
-                    finalizeDrawing((ImageView)whiteboardImageView, bitmapDrawingPane, xStart, yStart);
+                    storedX = xStart;
+                    storedY = yStart;
+                    m_upXValue = xStart;
+                    m_upYValue = yStart;
+                    newSelection = true;
                     break;
                 }
             }
             return true;
-
         }
     };
 
@@ -218,51 +231,115 @@ public class RegionSelectionActivity extends Activity {
     }
 
     private projectPt projectXY(ImageView iv, Bitmap bm, int x, int y){
-        if(x<0 || y<0 || x > iv.getWidth() || y > iv.getHeight()){
+        int lowerHeight = (iv.getHeight()/2)-(3*iv.getWidth()/8);
+        int upperHeight = lowerHeight + (3*iv.getWidth()/4);
+        if(x<0 || y<lowerHeight || x > iv.getWidth() || y > upperHeight){
             //outside ImageView
-            return null;
+            int canvasX = x;
+            int canvasY = y;
+            if (x < 0) {
+                startOutOfBoundsWidth = 1;
+                canvasX = 0;
+            }
+            if (y < lowerHeight) {
+                startOutOfBoundsHeight = 1;
+                canvasY = lowerHeight;
+            }
+            if (x > iv.getWidth()) {
+                startOutOfBoundsWidth = 2;
+                canvasX = iv.getWidth();
+            }
+            if (y > upperHeight) {
+                startOutOfBoundsHeight = 2;
+                canvasY = upperHeight;
+            }
+            return new projectPt(canvasX, canvasY);
         }else{
-            int projectedX = (int)((double)x * ((double)bm.getWidth()/(double)iv.getWidth()));
-            int projectedY = (int)((double)y * ((double)bm.getHeight()/(double)iv.getHeight()));
-
-            return new projectPt(projectedX, projectedY);
+            return new projectPt(x, y);
         }
     }
 
     private void drawOnRectProjectedBitMap(ImageView iv, Bitmap bm, int x, int y){
-        if(x<0 || y<0 || x > iv.getWidth() || y > iv.getHeight()){
-            //outside ImageView
-            return;
-        }else{
-            int projectedX = (int)((double)x * ((double)bm.getWidth()/(double)iv.getWidth()));
-            int projectedY = (int)((double)y * ((double)bm.getHeight()/(double)iv.getHeight()));
-
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
+        if(!save) {
+            paint.setColor(Color.RED);
+        }
+        else {
+            paint.setColor((Color.GREEN));
+        }
+        paint.setStrokeWidth(3);
+        int lowerHeight = (iv.getHeight()/2)-(3*iv.getWidth()/8);
+        int upperHeight = lowerHeight + (3*iv.getWidth()/4);
+        if(x < 0 || y < lowerHeight || x > iv.getWidth() || y > upperHeight) {
             //clear canvasDrawingPane
             canvasDrawingPane.drawColor(Color.TRANSPARENT, Mode.CLEAR);
 
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.RED);
-            paint.setStrokeWidth(3);
-            canvasDrawingPane.drawRect(startPt.x, startPt.y, projectedX, projectedY, paint);
-            imageDrawingPane.setImageBitmap(bitmapDrawingPane);
+            //outside ImageView
+            int canvasX2 = x;
+            int canvasY2 = y;
+            if (x < 0) {
+                canvasX2 = 0;
+            }
+            if (y < lowerHeight) {
+                canvasY2 = lowerHeight;
+            }
+            if (x > iv.getWidth()) {
+                canvasX2 = iv.getWidth();
+            }
+            if (y > upperHeight) {
+                canvasY2 = upperHeight;
+            }
+
+            canvasDrawingPane.drawRect(startPt.x, startPt.y, canvasX2, canvasY2, paint);
+            m_upXValue = canvasX2;
+            m_upYValue = canvasY2;
         }
+        else{
+            //clear canvasDrawingPane
+            canvasDrawingPane.drawColor(Color.TRANSPARENT, Mode.CLEAR);
+
+            canvasDrawingPane.drawRect(startPt.x, startPt.y, x, y, paint);
+        }
+        imageDrawingPane.setImageBitmap(bitmapDrawingPane);
     }
 
     private void finalizeDrawing(ImageView iv, Bitmap bm, int x, int y){
-        if(x<0 || y<0 || x > iv.getWidth() || y > iv.getHeight()){
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.GREEN);
+        paint.setStrokeWidth(3);
+        int lowerHeight = (iv.getHeight()/2)-(3*iv.getWidth()/8);
+        int upperHeight = lowerHeight + (3*iv.getWidth()/4);
+        if(x < 0 || y < lowerHeight || x > iv.getWidth() || y > upperHeight){
             //outside ImageView
-            return;
-        }else {
-            int projectedX = (int) ((double) x * ((double) bm.getWidth() / (double) iv.getWidth()));
-            int projectedY = (int) ((double) y * ((double) bm.getHeight() / (double) iv.getHeight()));
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.RED);
-            paint.setStrokeWidth(3);
-            canvasMaster.drawRect(startPt.x, startPt.y, projectedX, projectedY, paint);
-            imageResult.setImageBitmap(bitmapMaster);
+            int canvasX2 = x;
+            int canvasY2 = y;
+            if(x < 0){
+                canvasX2 = 0;
+                endOutOfBoundsWidth = 1;
+            }
+            if(y < lowerHeight) {
+                canvasY2 = lowerHeight;
+                endOutOfBoundsHeight = 1;
+            }
+            if(x > iv.getWidth()) {
+                canvasX2 = iv.getWidth();
+                endOutOfBoundsWidth = 2;
+            }
+            if(y > upperHeight) {
+                canvasY2 = upperHeight;
+                endOutOfBoundsHeight = 2;
+            }
+
+            if(!(startOutOfBoundsHeight == endOutOfBoundsHeight || startOutOfBoundsWidth == startOutOfBoundsHeight)) {
+                canvasMaster.drawRect(startPt.x, startPt.y, canvasX2, canvasY2, paint);
+            }
         }
+        else {
+            canvasMaster.drawRect(startPt.x, startPt.y, x, y, paint);
+        }
+        imageResult.setImageBitmap(bitmapMaster);
     }
 
     @Override
@@ -301,12 +378,10 @@ public class RegionSelectionActivity extends Activity {
                         canvasDrawingPane = new Canvas(bitmapDrawingPane);
                         imageDrawingPane.setImageBitmap(bitmapDrawingPane);
 
-
                     } catch (FileNotFoundException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-
                     break;
             }
         }

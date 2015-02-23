@@ -53,7 +53,8 @@
         android:longClickable="true"
         android:layout_below="@+id/saveSelectionButton"
         android:layout_above="@+id/eraseButton"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:adjustViewBounds="true"/>
 
     <ImageView
        android:id="@+id/result"

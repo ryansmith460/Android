@@ -18,7 +18,7 @@ import java.util.UUID;
 import android.widget.CheckBox;
 
 public class MainActivity extends Activity {
-    boolean debug = false;
+    boolean debug = true;
 
     //Bluetooth
     private BluetoothAdapter adapter = null;
