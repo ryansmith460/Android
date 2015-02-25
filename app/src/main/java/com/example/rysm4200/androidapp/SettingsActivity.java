@@ -31,7 +31,7 @@ public class SettingsActivity extends Activity {
     float highX = 0;
     float highY = 0;
     boolean touchEvent = false;
-    public int whiteboard[] = new int[8];
+    public byte whiteboard[] = new byte[8];
     int storedX = 0;
     int storedY = 0;
 
@@ -43,7 +43,7 @@ public class SettingsActivity extends Activity {
     int GET_BOARD_COORDINATES_ID;
     ImageView settingsWhiteboardImageView;
 
-    boolean debug = true;
+    boolean debug = false;
     boolean save = false;
     int sensitivity = 50;
 
@@ -56,7 +56,7 @@ public class SettingsActivity extends Activity {
         settingsWhiteboardImageView = (ImageView) findViewById(R.id.settingsWhiteboardImageView);
         Bundle extras = getIntent().getExtras();
         int[] intColors = extras.getIntArray("COLORS");
-        whiteboard = extras.getIntArray("COORDINATES");
+        whiteboard = extras.getByteArray("COORDINATES");
         int width = extras.getInt("WIDTH");
         int height = extras.getInt("HEIGHT");
 
@@ -80,6 +80,10 @@ public class SettingsActivity extends Activity {
         //if not debug, request coordinates from bluetooth
         if (!debug) {
             //ask for coordinates from bluetooth
+            m_downXValue = (whiteboard[0]<<8) | (int)(whiteboard[1]);
+            m_upXValue = (whiteboard[4]<<8) | (int)(whiteboard[5]);
+            m_downYValue = (whiteboard[2]<<8) | (int)(whiteboard[3]);
+            m_upYValue = (whiteboard[6]<<8) | (int)(whiteboard[7]);
 
         }
     }
