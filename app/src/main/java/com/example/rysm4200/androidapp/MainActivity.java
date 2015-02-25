@@ -28,7 +28,7 @@ public class MainActivity extends Activity {
     private BluetoothSocket socket = null;
     private static final UUID bT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static String address = "30:14:10:15:02:96";
-    BluetoothThread bT;
+    BluetoothThread bT, bT2;
     public boolean bluetoothRunning = false;
     ProgressBar bar;
 
@@ -49,6 +49,7 @@ public class MainActivity extends Activity {
 
     int[] imageIntegers;
     byte[] imageBytes;
+    byte[] coordinateBytes;
     int[] intColors;
 
     //Region Selection Activity
@@ -166,6 +167,24 @@ public class MainActivity extends Activity {
             //Wait until image is ready, then get the image
             while (bT.getSaveStatus() == true);
             imageBytes = bT.getImage();
+
+            bT = null;
+
+            // another bluetooth thread for the coordinates
+            bT = new BluetoothThread();
+
+            bT.settings();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
+
+            bT.startSaving();
+
+
+            code = 4;
+            byte [] coordinateRequestCode = {(byte)code};
+            bT.sendData(coordinateRequestCode);
+            while (bT.getSaveStatus() == true);
+            coordinateBytes = bT.getCoordinates();
         }
 
         byte tempValue;
@@ -188,9 +207,10 @@ public class MainActivity extends Activity {
             intColors[intIndex] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[numImagePts/3+intIndex ] << 8) | imageIntegers[2*numImagePts/3+intIndex];
         }
 
-        //Use the Settings Activity to get the regions
+        //Use the Settings Activity
         Intent intent = new Intent(this, settingsActivity.getClass());
         intent.putExtra("COLORS", intColors);
+        intent.putExtra("COORDINATES", coordinateBytes);
 
         if(isDownsampled) {
             intent.putExtra("WIDTH", width / 2);
@@ -228,7 +248,7 @@ public class MainActivity extends Activity {
             bT.sendData(imageRequestCode);
 
             //Wait until image is ready, then get the image
-            //COMMENTED OUT HERE
+
             while (bT.getSaveStatus() == true) ;
             imageBytes = bT.getImage();
         }
@@ -313,6 +333,7 @@ public class MainActivity extends Activity {
         //close out the thread
         if(!debug) {
             bT = null;
+            //bT2 = null;
         }
     }
 

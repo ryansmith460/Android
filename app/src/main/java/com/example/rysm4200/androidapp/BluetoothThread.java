@@ -14,15 +14,22 @@ public class BluetoothThread extends Thread{
     private InputStream Instream;
     private OutputStream OutStream;
     byte[] image;
+    byte[] coordinates;
     private boolean isSavingData = false;
     BluetoothSocket socket;
     int numImagePts;
     Handler progressHandler;
-
+    boolean settings = false;
 
     //Init Routine
     public boolean InitBluetoothThread(BluetoothSocket socket, int numImagePts, Handler handler){
-        image = new byte[numImagePts];
+        if (settings == false) {
+            image = new byte[numImagePts];
+        }
+        else {
+            //image = new byte[numImagePts];
+            coordinates = new byte[8];
+        }
 
         //Create I/0 Streams
         InputStream tmpIn = null;
@@ -66,6 +73,11 @@ public class BluetoothThread extends Thread{
         return image;
     }
 
+    public byte[] getCoordinates()
+    {
+        return coordinates;
+    }
+
     public boolean sendData(byte[] data)
     {
         try
@@ -77,6 +89,10 @@ public class BluetoothThread extends Thread{
             e.printStackTrace();
             return false;
         }
+    }
+
+    public void settings() {
+        settings = true;
     }
 
     //Automatically called when data is available on InputStream
@@ -92,19 +108,28 @@ public class BluetoothThread extends Thread{
             }
 
             isSavingData = true;
-
-            while (bytes < image.length) {
-                try {
-                    bytes += Instream.read(image, bytes, image.length - bytes);
-                    Message msg = progressHandler.obtainMessage();
-                    msg.arg1=bytes;
-                    msg.sendToTarget();
-
-                } catch (IOException t) {
-                    break;
+            if (!settings) {
+                while (bytes < image.length) {
+                    try {
+                        bytes += Instream.read(image, bytes, image.length - bytes);
+                        Message msg = progressHandler.obtainMessage();
+                        msg.arg1=bytes;
+                        msg.sendToTarget();
+                    } catch (IOException t) {
+                        break;
+                    }
                 }
             }
-
+            else {
+                while (bytes < coordinates.length) {
+                    try {
+                        bytes += Instream.read(coordinates, bytes, coordinates.length - bytes);
+                    } catch (IOException t) {
+                        break;
+                    }
+                }
+                settings = false;
+            }
             isSavingData = false;
         }
     }
