@@ -155,19 +155,20 @@ public class MainActivity extends Activity {
             bT = null;
 
             // another bluetooth thread for the coordinates
-            bT2 = new BluetoothThread();
+            bT = new BluetoothThread();
 
-            bT2.InitBluetoothThread(socket, numImagePts);
-            bT2.start();
-            bT2.settings();
-            bT2.startSaving();
+            bT.settings();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
+
+            bT.startSaving();
 
 
             code = 4;
             byte [] coordinateRequestCode = {(byte)code};
-            bT2.sendData(coordinateRequestCode);
-            while (bT2.getSaveStatus() == true);
-            coordinateBytes = bT2.getCoordinates();
+            bT.sendData(coordinateRequestCode);
+            while (bT.getSaveStatus() == true);
+            coordinateBytes = bT.getCoordinates();
         }
 
         byte tempValue;
@@ -193,6 +194,7 @@ public class MainActivity extends Activity {
         //Use the Settings Activity
         Intent intent = new Intent(this, settingsActivity.getClass());
         intent.putExtra("COLORS", intColors);
+        intent.putExtra("COORDINATES", coordinateBytes);
 
         if(isDownsampled) {
             intent.putExtra("WIDTH", width / 2);
@@ -230,7 +232,7 @@ public class MainActivity extends Activity {
             bT.sendData(imageRequestCode);
 
             //Wait until image is ready, then get the image
-            //COMMENTED OUT HERE
+
             while (bT.getSaveStatus() == true) ;
             imageBytes = bT.getImage();
         }

@@ -31,7 +31,7 @@ public class SettingsActivity extends Activity {
     float highX = 0;
     float highY = 0;
     boolean touchEvent = false;
-    public byte whiteboard[] = new byte[8];
+    public int whiteboard[] = new int[8];
     int storedX = 0;
     int storedY = 0;
 
@@ -56,6 +56,7 @@ public class SettingsActivity extends Activity {
         settingsWhiteboardImageView = (ImageView) findViewById(R.id.settingsWhiteboardImageView);
         Bundle extras = getIntent().getExtras();
         int[] intColors = extras.getIntArray("COLORS");
+        whiteboard = extras.getIntArray("COORDINATES");
         int width = extras.getInt("WIDTH");
         int height = extras.getInt("HEIGHT");
 
@@ -141,11 +142,6 @@ public class SettingsActivity extends Activity {
         finish();
     }
 
-    //used to go back to main screen from region selection
-    public void goBackButtonHandler(View view) {
-        //Use the Main Activity to exit this screen without erasing regions
-        finish();
-    }
 
     //used to add region that is currently drawn
     public void saveButtonHandler(View view) {
