@@ -16,9 +16,12 @@ import android.view.View;
 import android.graphics.Bitmap;
 import java.util.UUID;
 import android.widget.CheckBox;
+import android.widget.ProgressBar;
+import android.os.Handler;
+import android.os.Message;
 
 public class MainActivity extends Activity {
-    boolean debug = true;
+    boolean debug = false;
 
     //Bluetooth
     private BluetoothAdapter adapter = null;
@@ -27,6 +30,14 @@ public class MainActivity extends Activity {
     private static String address = "30:14:10:15:02:96";
     BluetoothThread bT;
     public boolean bluetoothRunning = false;
+    ProgressBar bar;
+
+    Handler progressHandler=new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            bar.setProgress(msg.arg1);
+        }
+    };
 
     //Hard-coded image size
     int width = 320;
@@ -61,6 +72,9 @@ public class MainActivity extends Activity {
     //New Regions
     byte[] regionSelectionCode = {3};
 
+    //Board region request
+    byte[] requestBoardRegionCode = {4};
+
     //request Image
     byte[] requestImageCode = {5};
 
@@ -68,6 +82,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        bar=(ProgressBar)findViewById(R.id.progressBar);
+
 
         //Configure main screen
         //getActionBar().setIcon(R.drawable.eraser);
@@ -135,7 +151,7 @@ public class MainActivity extends Activity {
         //Get an image of the board
         if(!debug) {
             bT = new BluetoothThread();
-            bT.InitBluetoothThread(socket, numImagePts);
+            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
             bT.start();
             bT.startSaving();
 
@@ -196,7 +212,7 @@ public class MainActivity extends Activity {
         Boolean isDownsampled = createImageArrays();
         if(!debug) {
             bT = new BluetoothThread();
-            bT.InitBluetoothThread(socket, numImagePts);
+            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
             bT.start();
             //    bluetoothRunning = true;
             //}
@@ -232,11 +248,6 @@ public class MainActivity extends Activity {
             throw new ArrayStoreException();
         }
 
-        /*//Convert to bitmap
-        for (int intIndex = 0; intIndex < numImagePts - 2; intIndex = intIndex + 3) {
-            intColors[intIndex / 3] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[intIndex + 1] << 8) | imageIntegers[intIndex + 2];
-        }*/
-
         //Convert to bitmap
         for (int intIndex = 0; intIndex < numImagePts/3; intIndex = intIndex + 1) {
             intColors[intIndex] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[numImagePts/3+intIndex ] << 8) | imageIntegers[2*numImagePts/3+intIndex];
@@ -269,7 +280,7 @@ public class MainActivity extends Activity {
                 int nRegions = data.getIntExtra("nRegions", 0);
                 //Send the coordinates to the Camera module
 
-                int code = nRegions << 4 | 0x03;
+                int code = nRegions << 4 | (int)regionSelectionCode[0];
                 byte [] regionCode = {(byte)code};
 
                 if(!debug) {
@@ -309,7 +320,7 @@ public class MainActivity extends Activity {
     {
         if(!debug) {
             bT = new BluetoothThread();
-            bT.InitBluetoothThread(socket, numImagePts);
+            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
             bT.start();
         }
         eraseAll = true;
@@ -332,7 +343,7 @@ public class MainActivity extends Activity {
     public void emergencyStopButtonHandler(View view) {
         if(!debug) {
             bT = new BluetoothThread();
-            bT.InitBluetoothThread(socket, numImagePts);
+            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
             bT.start();
         }
         emergencyStop = true;
@@ -365,6 +376,7 @@ public class MainActivity extends Activity {
 
         imageIntegers = new int[numImagePts];
         imageBytes = new byte[numImagePts];
+        bar.setMax(imageBytes.length);
         intColors = new int[numImagePts / 3];
 
         return cb.isChecked();

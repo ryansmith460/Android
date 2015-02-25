@@ -164,14 +164,60 @@ public class SettingsActivity extends Activity {
         int[] imgViewLocation = new int[2];
         settingsWhiteboardImageView.getLocationOnScreen(imgViewLocation);
 
-        whiteboard[0] = (byte) ((((int) (lowX - imgViewLocation[0])) & 0xFF00) >> 8);
-        whiteboard[1] = (byte) ((int) (lowX - imgViewLocation[0]) & 0xFF);
-        whiteboard[2] = (byte) ((((int) (lowY - imgViewLocation[1])) & 0xFF00) >> 8);
-        whiteboard[3] = (byte) ((int) (lowY - imgViewLocation[1]) & 0xFF);
-        whiteboard[4] = (byte) ((((int) (highX - imgViewLocation[0])) & 0xFF00) >> 8);
-        whiteboard[5] = (byte) ((int) (highX - imgViewLocation[0]) & 0xFF);
-        whiteboard[6] = (byte) ((((int) (highY - imgViewLocation[1])) & 0xFF00) >> 8);
-        whiteboard[7] = (byte) ((int) (highY - imgViewLocation[1]) & 0xFF);
+        int lowerHeight = (settingsWhiteboardImageView.getHeight()/2)-(3*settingsWhiteboardImageView.getWidth()/8);
+        int upperHeight = lowerHeight + (3*settingsWhiteboardImageView.getWidth()/4);
+        double picHeight = (double)upperHeight - (double)lowerHeight;
+        double ratio;
+        double value;
+
+        ratio = (double)settingsWhiteboardImageView.getWidth()/320.0;
+        value = lowX/ratio;
+        value = ((int) value & 0xFF00) >> 8;
+        whiteboard[0] = (byte)value;
+
+        ratio = (double)settingsWhiteboardImageView.getWidth()/320.0;
+        value = lowX/ratio;
+        value = (int) value & 0xFF;
+        whiteboard[1] = (byte)value;
+
+        ratio = picHeight/240.0;
+        value = (lowY - lowerHeight)/ratio;
+        value = ((int) value & 0xFF00) >> 8;
+        whiteboard[2] = (byte)value;
+
+        ratio = picHeight/240.0;
+        value = (lowY - lowerHeight)/ratio;
+        value = (int) value & 0xFF;
+        whiteboard[3] = (byte)value;
+
+        ratio = (double)settingsWhiteboardImageView.getWidth()/320.0;
+        value = highX/ratio;
+        value = ((int) value & 0xFF00) >> 8;
+        whiteboard[4] = (byte)value;
+
+        ratio = (double)settingsWhiteboardImageView.getWidth()/320.0;
+        value = highX/ratio;
+        value = (int) value & 0xFF;
+        whiteboard[5] = (byte)value;
+
+        ratio = picHeight/240.0;
+        value = (highY - (double)lowerHeight)/ratio;
+        value = ((int) value & 0xFF00) >> 8;
+        whiteboard[6] = (byte)value;
+
+        ratio = picHeight/240.0;
+        value = (highY - (double)lowerHeight)/ratio;
+        value = (int) value & 0xFF;
+        whiteboard[7] = (byte)value;
+
+        //whiteboard[0] = (byte) ((((int) (lowX - imgViewLocation[0])) & 0xFF00) >> 8);
+        //whiteboard[1] = (byte) ((int) (lowX - imgViewLocation[0]) & 0xFF);
+        //whiteboard[2] = (byte) ((((int) (lowY - imgViewLocation[1])) & 0xFF00) >> 8);
+        //whiteboard[3] = (byte) ((int) (lowY - imgViewLocation[1]) & 0xFF);
+        //whiteboard[4] = (byte) ((((int) (highX - imgViewLocation[0])) & 0xFF00) >> 8);
+        //whiteboard[5] = (byte) ((int) (highX - imgViewLocation[0]) & 0xFF);
+        //whiteboard[6] = (byte) ((((int) (highY - imgViewLocation[1])) & 0xFF00) >> 8);
+        //whiteboard[7] = (byte) ((int) (highY - imgViewLocation[1]) & 0xFF);
     }
 
     // Defines the one method for the interface, which is called when the View is long-clicked

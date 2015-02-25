@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothSocket;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import android.os.Handler;
+import android.os.Message;
 
 /**
  * Created by rysm4200 on 1/25/2015.
@@ -15,14 +17,18 @@ public class BluetoothThread extends Thread{
     private boolean isSavingData = false;
     BluetoothSocket socket;
     int numImagePts;
+    Handler progressHandler;
+
 
     //Init Routine
-    public boolean InitBluetoothThread(BluetoothSocket socket, int numImagePts){
+    public boolean InitBluetoothThread(BluetoothSocket socket, int numImagePts, Handler handler){
         image = new byte[numImagePts];
 
         //Create I/0 Streams
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
+
+        progressHandler = handler;
 
         try
         {
@@ -90,6 +96,10 @@ public class BluetoothThread extends Thread{
             while (bytes < image.length) {
                 try {
                     bytes += Instream.read(image, bytes, image.length - bytes);
+                    Message msg = progressHandler.obtainMessage();
+                    msg.arg1=bytes;
+                    msg.sendToTarget();
+
                 } catch (IOException t) {
                     break;
                 }

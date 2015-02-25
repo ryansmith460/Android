@@ -49,10 +49,22 @@
         android:layout_height="wrap_content"
         android:text="Downsample Image"
         android:id="@+id/cbDownSample"
-        android:layout_alignParentBottom="true"
+        android:checked="false"
+        android:layout_alignTop="@+id/regionSelectionButton"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="58dp"
-        android:checked="false" />
+        android:layout_marginTop="74dp" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_below="@+id/settingsButton"
+        android:layout_alignLeft="@+id/cbDownSample"
+        android:layout_alignStart="@+id/cbDownSample"
+        android:layout_marginTop="53dp"
+        android:layout_alignRight="@+id/cbDownSample"
+        android:layout_alignEnd="@+id/cbDownSample" />
 
 </RelativeLayout>
     
