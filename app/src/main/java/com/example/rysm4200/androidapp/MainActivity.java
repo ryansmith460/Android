@@ -18,14 +18,14 @@ import java.util.UUID;
 import android.widget.CheckBox;
 
 public class MainActivity extends Activity {
-    boolean debug = true;
+    boolean debug = false;
 
     //Bluetooth
     private BluetoothAdapter adapter = null;
     private BluetoothSocket socket = null;
     private static final UUID bT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static String address = "30:14:10:15:02:96";
-    BluetoothThread bT;
+    BluetoothThread bT, bT2;
     public boolean bluetoothRunning = false;
 
     //Hard-coded image size
@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
 
     int[] imageIntegers;
     byte[] imageBytes;
+    byte[] coordinateBytes;
     int[] intColors;
 
     //Region Selection Activity
@@ -150,6 +151,23 @@ public class MainActivity extends Activity {
             //Wait until image is ready, then get the image
             while (bT.getSaveStatus() == true);
             imageBytes = bT.getImage();
+
+            bT = null;
+
+            // another bluetooth thread for the coordinates
+            bT2 = new BluetoothThread();
+
+            bT2.InitBluetoothThread(socket, numImagePts);
+            bT2.start();
+            bT2.settings();
+            bT2.startSaving();
+
+
+            code = 4;
+            byte [] coordinateRequestCode = {(byte)code};
+            bT2.sendData(coordinateRequestCode);
+            while (bT2.getSaveStatus() == true);
+            coordinateBytes = bT2.getCoordinates();
         }
 
         byte tempValue;
@@ -172,7 +190,7 @@ public class MainActivity extends Activity {
             intColors[intIndex] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[numImagePts/3+intIndex ] << 8) | imageIntegers[2*numImagePts/3+intIndex];
         }
 
-        //Use the Settings Activity to get the regions
+        //Use the Settings Activity
         Intent intent = new Intent(this, settingsActivity.getClass());
         intent.putExtra("COLORS", intColors);
 
@@ -302,6 +320,7 @@ public class MainActivity extends Activity {
         //close out the thread
         if(!debug) {
             bT = null;
+            //bT2 = null;
         }
     }
 

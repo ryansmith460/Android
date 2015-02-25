@@ -76,6 +76,11 @@ public class SettingsActivity extends Activity {
             m_downYValue = 350;
             m_upYValue = 650;
         }
+        //if not debug, request coordinates from bluetooth
+        if (!debug) {
+            //ask for coordinates from bluetooth
+
+        }
     }
 
     OnGlobalLayoutListener myOnGlobalLayoutListener =
