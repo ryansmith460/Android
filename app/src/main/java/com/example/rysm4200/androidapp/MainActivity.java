@@ -174,7 +174,7 @@ public class MainActivity extends Activity {
             bT = new BluetoothThread();
 
             bT.settings();
-            bT.InitBluetoothThread(socket, numImagePts);
+            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
             bT.start();
 
             bT.startSaving();

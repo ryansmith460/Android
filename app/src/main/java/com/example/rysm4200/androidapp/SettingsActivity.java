@@ -70,28 +70,46 @@ public class SettingsActivity extends Activity {
         settingsLayout.getViewTreeObserver().addOnGlobalLayoutListener(myOnGlobalLayoutListener);
 
         imageDrawingPane = (ImageView) findViewById(R.id.drawingpane);
-
-        if (debug) {
-            m_downXValue = 250;
-            m_upXValue = 550;
-            m_downYValue = 350;
-            m_upYValue = 650;
-        }
-        //if not debug, request coordinates from bluetooth
-        if (!debug) {
-            //ask for coordinates from bluetooth
-            m_downXValue = (whiteboard[0]<<8) | (int)(whiteboard[1]);
-            m_upXValue = (whiteboard[4]<<8) | (int)(whiteboard[5]);
-            m_downYValue = (whiteboard[2]<<8) | (int)(whiteboard[3]);
-            m_upYValue = (whiteboard[6]<<8) | (int)(whiteboard[7]);
-
-        }
     }
 
     OnGlobalLayoutListener myOnGlobalLayoutListener =
             new OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
+                    if (debug) {
+                        m_downXValue = 250;
+                        m_upXValue = 550;
+                        m_downYValue = 350;
+                        m_upYValue = 650;
+                    }
+                    //if not debug, request coordinates from bluetooth
+                    if (!debug) {
+                        //ask for coordinates from bluetooth
+
+                        m_downXValue = (whiteboard[0] << 8) | (0x00FF & (int)whiteboard[1]);
+                        m_upXValue = (whiteboard[4] << 8) | (0x00FF & (int)whiteboard[5]);
+                        m_upYValue = (whiteboard[2] << 8) | (0x00FF & (int)whiteboard[3]);
+                        m_downYValue = (whiteboard[6] << 8) | (0x00FF & (int)whiteboard[7]);
+
+                        int lowerHeight = (settingsWhiteboardImageView.getHeight() / 2) - (3 * settingsWhiteboardImageView.getWidth() / 8);
+                        int upperHeight = lowerHeight + (3 * settingsWhiteboardImageView.getWidth() / 4);
+                        double picHeight = (double) upperHeight - (double) lowerHeight;
+                        double ratio;
+
+                        ratio = (double) settingsWhiteboardImageView.getWidth() / 320.0;
+                        m_downXValue = m_downXValue*(float)ratio;
+
+                        ratio = (double) settingsWhiteboardImageView.getWidth() / 320.0;
+                        m_upXValue = m_upXValue*(float)ratio;
+
+                        ratio = picHeight / 240.0;
+                        m_downYValue = m_downYValue*(float)ratio + lowerHeight;
+
+                        ratio = picHeight / 240.0;
+                        m_upYValue = m_upYValue*(float)ratio + lowerHeight;
+                    }
+
+
                     int whiteX = settingsWhiteboardImageView.getWidth();
                     int whiteY = settingsWhiteboardImageView.getHeight();
                     bitmapDrawingPane = Bitmap.createBitmap(whiteX, whiteY, Bitmap.Config.ARGB_8888);
