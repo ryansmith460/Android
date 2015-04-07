@@ -124,7 +124,7 @@ public class RegionSelectionActivity extends Activity {
 
         for (int i = 0; i < numberOfRegions; i++) {
             resultRegions[8*i] = regions[8*i];
-            //edit
+            //ed
             resultRegions[8*i+1] = regions[8*i+1];
             resultRegions[8*i+2] = regions[8*i+2];
             resultRegions[8*i+3] = regions[8*i+3];
