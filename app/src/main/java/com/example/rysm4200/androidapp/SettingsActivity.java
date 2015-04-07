@@ -43,7 +43,7 @@ public class SettingsActivity extends Activity {
     int GET_BOARD_COORDINATES_ID;
     ImageView settingsWhiteboardImageView;
 
-    boolean debug = false;
+    boolean debug = true;
     boolean save = false;
     int sensitivity = 50;
 
@@ -157,12 +157,12 @@ public class SettingsActivity extends Activity {
     }
 
 
-    public void exitSaveButtonHandler(View view) {
+    /*public void exitSaveButtonHandler(View view) {
         Intent data = new Intent();
         data.putExtra("Coordinates", whiteboard);
         setResult(RESULT_OK, data);
         finish();
-    }
+    }*/
 
 
     //used to add region that is currently drawn

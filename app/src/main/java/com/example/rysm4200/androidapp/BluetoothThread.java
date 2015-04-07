@@ -22,7 +22,7 @@ public class BluetoothThread extends Thread{
     boolean settings = false;
 
     //Init Routine
-    public boolean InitBluetoothThread(BluetoothSocket socket, int numImagePts, Handler handler){
+    public boolean InitBluetoothThread(BluetoothSocket socket, int numImagePts){
         if (settings == false) {
             image = new byte[numImagePts];
         }
@@ -35,7 +35,7 @@ public class BluetoothThread extends Thread{
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
 
-        progressHandler = handler;
+        //progressHandler = handler;
 
         try
         {

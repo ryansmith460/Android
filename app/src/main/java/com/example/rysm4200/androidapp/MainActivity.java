@@ -17,11 +17,13 @@ import android.graphics.Bitmap;
 import java.util.UUID;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 import android.os.Handler;
 import android.os.Message;
+import android.content.Context;
 
 public class MainActivity extends Activity {
-    boolean debug = false;
+    boolean debug = true;
 
     //Bluetooth
     private BluetoothAdapter adapter = null;
@@ -30,14 +32,7 @@ public class MainActivity extends Activity {
     private static String address = "30:14:10:15:02:96";
     BluetoothThread bT, bT2;
     public boolean bluetoothRunning = false;
-    ProgressBar bar;
 
-    Handler progressHandler=new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            bar.setProgress(msg.arg1);
-        }
-    };
 
     //Hard-coded image size
     int width = 320;
@@ -83,7 +78,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        bar=(ProgressBar)findViewById(R.id.progressBar);
+        //bar=(ProgressBar)findViewById(R.id.progressBar);
 
 
         //Configure main screen
@@ -149,10 +144,16 @@ public class MainActivity extends Activity {
         //Set up the image arrays
         Boolean isDownsampled = createImageArrays();
 
+        Context context = getApplicationContext();
+        CharSequence text = "An image of the whiteboard is sending.";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+
         //Get an image of the board
         if(!debug) {
             bT = new BluetoothThread();
-            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
+            bT.InitBluetoothThread(socket, numImagePts);
             bT.start();
             bT.startSaving();
 
@@ -174,7 +175,7 @@ public class MainActivity extends Activity {
             bT = new BluetoothThread();
 
             bT.settings();
-            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
+            bT.InitBluetoothThread(socket, numImagePts);
             bT.start();
 
             bT.startSaving();
@@ -228,11 +229,17 @@ public class MainActivity extends Activity {
     //Region selection button handler
     public void regionSelectionButtonHandler(View view) {
 
+        Context context = getApplicationContext();
+        CharSequence text = "An image of the whiteboard is sending.";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+
         //Set up the image arrays
         Boolean isDownsampled = createImageArrays();
         if(!debug) {
             bT = new BluetoothThread();
-            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
+            bT.InitBluetoothThread(socket, numImagePts);
             bT.start();
             //    bluetoothRunning = true;
             //}
@@ -341,7 +348,7 @@ public class MainActivity extends Activity {
     {
         if(!debug) {
             bT = new BluetoothThread();
-            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
+            bT.InitBluetoothThread(socket, numImagePts);
             bT.start();
         }
         eraseAll = true;
@@ -358,13 +365,18 @@ public class MainActivity extends Activity {
         if(!debug) {
             bT=null;
         }
+        Context context = getApplicationContext();
+        CharSequence text = "The robot will now erase the entire whiteboard.";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
 
     }
 
     public void emergencyStopButtonHandler(View view) {
         if(!debug) {
             bT = new BluetoothThread();
-            bT.InitBluetoothThread(socket, numImagePts, progressHandler);
+            bT.InitBluetoothThread(socket, numImagePts);
             bT.start();
         }
         emergencyStop = true;
@@ -381,6 +393,11 @@ public class MainActivity extends Activity {
         if(!debug) {
             bT=null;
         }
+        Context context = getApplicationContext();
+        CharSequence text = "The robot will now STOP.";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
 
@@ -397,7 +414,7 @@ public class MainActivity extends Activity {
 
         imageIntegers = new int[numImagePts];
         imageBytes = new byte[numImagePts];
-        bar.setMax(imageBytes.length);
+        //bar.setMax(imageBytes.length);
         intColors = new int[numImagePts / 3];
 
         return cb.isChecked();

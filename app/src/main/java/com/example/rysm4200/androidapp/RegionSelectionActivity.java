@@ -3,6 +3,7 @@ package com.example.rysm4200.androidapp;
 import java.io.FileNotFoundException;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.widget.Toast;
 
 public class RegionSelectionActivity extends Activity {
 
@@ -108,6 +110,15 @@ public class RegionSelectionActivity extends Activity {
     }
 
     public void eraseButtonHandler(View view) {
+        if (numberOfRegions>0) {
+            Context context = getApplicationContext();
+            CharSequence text = "The robot will now erase the selected regions.";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
+
         //Only send data for the nRegions that were selected
         byte resultRegions[] = new byte[numberOfRegions*8];
 

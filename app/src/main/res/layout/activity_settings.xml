@@ -5,51 +5,43 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:id="@+id/settingslayout">>
+    android:id="@+id/settingslayout"
+    android:background="#8c006eff">>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="75dp"
         android:layout_height="wrap_content"
-        android:text="Go Back without Saving"
+        android:layout_alignParentBottom="true"
+        android:text="Exit"
         android:id="@+id/goBackButton"
         android:onClick="goBackSettingsButtonHandler"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
         android:layout_toRightOf="@+id/saveButton"
-        android:layout_toEndOf="@+id/saveButton" />
+        android:layout_toEndOf="@+id/saveButton"
+        android:textColor="#ffff081c" />
 
     <Button
-        android:layout_width="149dp"
+        android:layout_width="75dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:text="Save"
         android:id="@+id/saveButton"
         android:layout_gravity="end"
         android:onClick="saveButtonHandler"
         android:layout_alignBottom="@+id/goBackButton"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:text="Exit"
-        android:id="@+id/exitSaveButton"
-        android:onClick="exitSaveButtonHandler"
-        android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/drawingpane"
-        android:layout_alignEnd="@+id/drawingpane" />
+        android:textColor="#ffff081c" />
 
     <ImageView
         android:id="@+id/settingsWhiteboardImageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/exitSaveButton"
-        android:layout_alignEnd="@+id/goBackButton"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:longClickable="true"
-        android:layout_below="@+id/exitSaveButton"
         android:visibility="visible"
         android:adjustViewBounds="true"
-        android:layout_above="@+id/goBackButton" />
+        android:layout_above="@+id/goBackButton"
+        android:layout_below="@+id/sombrero"
+        android:layout_alignRight="@+id/drawingpane" />
 
     <ImageView
         android:id="@+id/drawingpane"
@@ -60,8 +52,25 @@
         android:layout_alignTop="@+id/settingsWhiteboardImageView"
         android:visibility="visible"
         android:layout_above="@+id/goBackButton"
-        android:layout_alignRight="@+id/goBackButton"
-        android:adjustViewBounds="true"
-        android:layout_alignEnd="@+id/goBackButton" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/sombrero"
+        android:adjustViewBounds="true" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_height="100dp"
+        android:id="@+id/sombrero"
+        android:background="@drawable/sobrero2"
+        android:paddingRight="20dp"
+        android:paddingLeft="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/drawingpane"
+        android:layout_alignEnd="@+id/drawingpane"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>
