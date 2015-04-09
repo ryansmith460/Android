@@ -2,6 +2,7 @@ package com.example.rysm4200.androidapp;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -21,11 +22,15 @@ import android.widget.Toast;
 import android.os.Handler;
 import android.os.Message;
 import android.content.Context;
+import android.bluetooth.BluetoothProfile;
 
 public class MainActivity extends Activity {
-    boolean debug = true;
+    boolean debug = false;
+
+
 
     //Bluetooth
+    private BluetoothProfile mBluetoothProfile;
     private BluetoothAdapter adapter = null;
     private BluetoothSocket socket = null;
     private static final UUID bT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -74,15 +79,12 @@ public class MainActivity extends Activity {
     //request Image
     byte[] requestImageCode = {5};
 
+    boolean failed = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //bar=(ProgressBar)findViewById(R.id.progressBar);
-
-
-        //Configure main screen
-        //getActionBar().setIcon(R.drawable.eraser);
 
         //Set up Bluetooth Communication
         adapter = BluetoothAdapter.getDefaultAdapter();
@@ -91,6 +93,7 @@ public class MainActivity extends Activity {
             try {
                 socket = bTDevice.createRfcommSocketToServiceRecord(bT_UUID);
             } catch (IOException e) {
+                failed = true;
             }
 
             adapter.cancelDiscovery();
@@ -99,13 +102,14 @@ public class MainActivity extends Activity {
             try {
                 socket.connect();
             } catch (IOException e) {
+                failed = true;
                 try {
                     socket.close();
                 } catch (IOException e2) {
+                    failed = true;
                 }
             }
         }
-
 
             //Create Region selection activity
             regionSelection = new RegionSelectionActivity();
@@ -114,8 +118,23 @@ public class MainActivity extends Activity {
             //Create Settings Activity
             settingsActivity = new SettingsActivity();
             settingsActivity.Init(GET_BOARD_COORDINATES_ID);
+
+
     }
 
+
+            @Override
+    protected void onStart() {
+        super.onStart();
+        if (!failed) {
+           //tell the user that it is connected
+           Context context = getApplicationContext();
+           CharSequence text = "The bluetooth connection has been established.";
+           int duration = Toast.LENGTH_LONG;
+           Toast toast = Toast.makeText(context, text, duration);
+           toast.show();
+           }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

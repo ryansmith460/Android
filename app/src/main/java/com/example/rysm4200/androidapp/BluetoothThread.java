@@ -35,7 +35,6 @@ public class BluetoothThread extends Thread{
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
 
-        //progressHandler = handler;
 
         try
         {
