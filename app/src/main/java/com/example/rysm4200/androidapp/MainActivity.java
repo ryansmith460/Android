@@ -80,6 +80,7 @@ public class MainActivity extends Activity {
     byte[] requestImageCode = {5};
 
     boolean failed = false;
+    boolean done = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,17 +124,48 @@ public class MainActivity extends Activity {
     }
 
 
-            @Override
+    @Override
     protected void onStart() {
         super.onStart();
-        if (!failed) {
-           //tell the user that it is connected
-           Context context = getApplicationContext();
-           CharSequence text = "The bluetooth connection has been established.";
-           int duration = Toast.LENGTH_LONG;
-           Toast toast = Toast.makeText(context, text, duration);
-           toast.show();
-           }
+        if (debug)
+        {
+            failed = false;
+        }
+        if (!failed && !done) {
+            //tell the user that it is connected
+            Context context = getApplicationContext();
+            CharSequence text = "The bluetooth connection has been established.";
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+            done = true;
+        }
+        else {
+            if (!done) {
+                //tell the user that they need to get bluetooth connection
+                Context context = getApplicationContext();
+                CharSequence text = "Bluetooth connection FAILED.";
+                int duration = Toast.LENGTH_LONG;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+                CharSequence text2 = "Check that Bluetooth is ON on the Android device.";
+                Toast toast2 = Toast.makeText(context, text2, duration);
+                toast2.show();
+                CharSequence text3 = "Check that the camera module is on.";
+                Toast toast3 = Toast.makeText(context, text3, duration);
+                toast3.show();
+                CharSequence text4 = "Then reopen the Eraser-Bot App.";
+                Toast toast4 = Toast.makeText(context, text4, duration);
+                toast4.show();
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                finish();
+            }
+        }
     }
 
     @Override
@@ -162,12 +194,6 @@ public class MainActivity extends Activity {
     public void settingsButtonHandler(View view) {
         //Set up the image arrays
         Boolean isDownsampled = createImageArrays();
-
-        Context context = getApplicationContext();
-        CharSequence text = "An image of the whiteboard is sending.";
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
 
         //Get an image of the board
         if(!debug) {
@@ -205,6 +231,12 @@ public class MainActivity extends Activity {
             bT.sendData(coordinateRequestCode);
             while (bT.getSaveStatus() == true);
             coordinateBytes = bT.getCoordinates();
+
+            Context context = getApplicationContext();
+            CharSequence text = "An image of the whiteboard is sending.";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
         }
 
         byte tempValue;
@@ -248,12 +280,6 @@ public class MainActivity extends Activity {
     //Region selection button handler
     public void regionSelectionButtonHandler(View view) {
 
-        Context context = getApplicationContext();
-        CharSequence text = "An image of the whiteboard is sending.";
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-
         //Set up the image arrays
         Boolean isDownsampled = createImageArrays();
         if(!debug) {
@@ -277,6 +303,12 @@ public class MainActivity extends Activity {
 
             while (bT.getSaveStatus() == true) ;
             imageBytes = bT.getImage();
+
+            Context context = getApplicationContext();
+            CharSequence text = "An image of the whiteboard is sending.";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
         }
 
         byte tempValue;
@@ -438,6 +470,4 @@ public class MainActivity extends Activity {
 
         return cb.isChecked();
     }
-
-
 }
