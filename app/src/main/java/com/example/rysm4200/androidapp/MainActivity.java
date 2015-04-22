@@ -25,7 +25,7 @@ import android.content.Context;
 import android.bluetooth.BluetoothProfile;
 
 public class MainActivity extends Activity {
-    boolean debug = false;
+    boolean debug = true;
 
 
 

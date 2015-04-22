@@ -60,7 +60,7 @@ public class RobotActivity extends Activity {
     int GET_ROBOT_COORDINATES_ID;
     ImageView robotImageView;
 
-    boolean debug = false;
+    boolean debug = true;
     boolean save = false;
     int sensitivity = 50;
 

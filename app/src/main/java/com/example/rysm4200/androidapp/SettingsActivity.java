@@ -43,7 +43,7 @@ public class SettingsActivity extends Activity {
     int GET_BOARD_COORDINATES_ID;
     ImageView settingsWhiteboardImageView;
 
-    boolean debug = false;
+    boolean debug = true;
     boolean save = false;
     int sensitivity = 51;
 
