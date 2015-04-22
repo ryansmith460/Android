@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:screenOrientation="portrait"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -38,14 +39,27 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Settings"
-        android:id="@+id/settingsButton"
-        android:onClick="settingsButtonHandler"
+        android:text="Identify whiteboard region."
+        android:id="@+id/whiteboardButton"
+        android:onClick="whiteboardButtonHandler"
         android:textColor="#ffff081c"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
+        android:layout_alignRight="@+id/robotButton"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Identify Robot."
+        android:id="@+id/robotButton"
+        android:onClick="robotButtonHandler"
+        android:textColor="#ffff081c"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"/>
+        android:layout_alignParentLeft="true"
+        android:layout_gravity="center_horizontal|bottom"/>
 
     <CheckBox
         android:layout_width="wrap_content"
@@ -53,7 +67,7 @@
         android:text="Downsample Image"
         android:id="@+id/cbDownSample"
         android:checked="false"
-        android:layout_above="@id/settingsButton"
+        android:layout_above="@id/whiteboardButton"
         android:layout_centerHorizontal="true"/>
 
     <FrameLayout

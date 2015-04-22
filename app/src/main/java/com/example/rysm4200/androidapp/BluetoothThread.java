@@ -15,19 +15,25 @@ public class BluetoothThread extends Thread{
     private OutputStream OutStream;
     byte[] image;
     byte[] coordinates;
+    byte[] robotCoordinates;
     private boolean isSavingData = false;
     BluetoothSocket socket;
     int numImagePts;
     Handler progressHandler;
-    boolean settings = false;
+    boolean whiteboard = false;
+    boolean robot = false;
 
     //Init Routine
     public boolean InitBluetoothThread(BluetoothSocket socket, int numImagePts){
-        if (settings == false) {
+        if (whiteboard == false && robot == false) {
             image = new byte[numImagePts];
         }
-        else {
+        if (whiteboard == false && robot == true) {
             //image = new byte[numImagePts];
+            //coordinates = new byte[8];
+            robotCoordinates = new byte[16];
+        }
+        if (whiteboard == true && robot == false){
             coordinates = new byte[8];
         }
 
@@ -77,6 +83,11 @@ public class BluetoothThread extends Thread{
         return coordinates;
     }
 
+    public byte[] getRobotCoordinates()
+    {
+        return robotCoordinates;
+    }
+
     public boolean sendData(byte[] data)
     {
         try
@@ -90,8 +101,14 @@ public class BluetoothThread extends Thread{
         }
     }
 
-    public void settings() {
-        settings = true;
+    public void whiteboard()
+    {
+        whiteboard = true;
+    }
+
+    public void robot()
+    {
+        robot = true;
     }
 
     //Automatically called when data is available on InputStream
@@ -107,29 +124,41 @@ public class BluetoothThread extends Thread{
             }
 
             isSavingData = true;
-            if (!settings) {
+            if (!whiteboard && !robot) {
                 while (bytes < image.length) {
                     try {
                         bytes += Instream.read(image, bytes, image.length - bytes);
-                        Message msg = progressHandler.obtainMessage();
-                        msg.arg1=bytes;
-                        msg.sendToTarget();
+                        //Message msg = progressHandler.obtainMessage();
+                        //msg.arg1=bytes;
+                        //msg.sendToTarget();
                     } catch (IOException t) {
                         break;
                     }
                 }
             }
-            else {
-                while (bytes < coordinates.length) {
-                    try {
-                        bytes += Instream.read(coordinates, bytes, coordinates.length - bytes);
-                    } catch (IOException t) {
-                        break;
+           else if (whiteboard && !robot) {
+                    while (bytes < coordinates.length) {
+                        try {
+                            bytes += Instream.read(coordinates, bytes, coordinates.length - bytes);
+                        } catch (IOException t) {
+                            break;
+                        }
                     }
+                    whiteboard = false;
                 }
-                settings = false;
-            }
+           else if(!whiteboard && robot){
+                    while (bytes < robotCoordinates.length) {
+                        try {
+                            bytes += Instream.read(robotCoordinates, bytes, robotCoordinates.length - bytes);
+                        } catch (IOException t) {
+                            break;
+                        }
+                    }
+                    robot = false;
+                }
             isSavingData = false;
-        }
+            }
+
+
     }
 }

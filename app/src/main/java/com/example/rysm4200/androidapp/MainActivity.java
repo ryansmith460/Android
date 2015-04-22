@@ -29,6 +29,7 @@ public class MainActivity extends Activity {
 
 
 
+
     //Bluetooth
     private BluetoothProfile mBluetoothProfile;
     private BluetoothAdapter adapter = null;
@@ -50,6 +51,7 @@ public class MainActivity extends Activity {
     int[] imageIntegers;
     byte[] imageBytes;
     byte[] coordinateBytes;
+    byte[] robotCoordinateBytes;
     int[] intColors;
 
     //Region Selection Activity
@@ -60,10 +62,16 @@ public class MainActivity extends Activity {
     SettingsActivity settingsActivity;
     int GET_BOARD_COORDINATES_ID = 2;
 
+    //Robot Activity
+    RobotActivity robotActivity;
+    //CAN I USE 3?!??!?
+    int GET_ROBOT_COORDINATES_ID = 3;
+
     //New Board Region
     byte[] boardRegionCode = {0};
     //Erase All
     boolean eraseAll = false;
+
     byte[] eraseAllCode = {1};
 
     //Emergency Stop
@@ -76,13 +84,17 @@ public class MainActivity extends Activity {
     //Board region request
     byte[] requestBoardRegionCode = {4};
 
+    byte[] robotRegionCode = {3};
+
     //request Image
     byte[] requestImageCode = {5};
 
     boolean failed = false;
+    boolean done = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //done = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -119,21 +131,56 @@ public class MainActivity extends Activity {
             settingsActivity = new SettingsActivity();
             settingsActivity.Init(GET_BOARD_COORDINATES_ID);
 
+            //create robot activity
+            robotActivity = new RobotActivity();
+            robotActivity.Init(GET_ROBOT_COORDINATES_ID);
+
 
     }
 
 
-            @Override
+    @Override
     protected void onStart() {
         super.onStart();
-        if (!failed) {
+        if (debug)
+        {
+           failed = false;
+        }
+        if (!failed && !done) {
            //tell the user that it is connected
            Context context = getApplicationContext();
            CharSequence text = "The bluetooth connection has been established.";
            int duration = Toast.LENGTH_LONG;
            Toast toast = Toast.makeText(context, text, duration);
            toast.show();
+           done = true;
            }
+                else {
+            if (!done) {
+                //tell the user that they need to get bluetooth connection
+                Context context = getApplicationContext();
+                CharSequence text = "Bluetooth connection FAILED.";
+                int duration = Toast.LENGTH_LONG;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+                CharSequence text2 = "Check that Bluetooth is ON on the Android device.";
+                Toast toast2 = Toast.makeText(context, text2, duration);
+                toast2.show();
+                CharSequence text3 = "Check that the camera module is on.";
+                Toast toast3 = Toast.makeText(context, text3, duration);
+                toast3.show();
+                CharSequence text4 = "Then reopen the Eraser-Bot App.";
+                Toast toast4 = Toast.makeText(context, text4, duration);
+                toast4.show();
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                finish();
+            }
+        }
     }
 
     @Override
@@ -158,16 +205,104 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    //Settings button handler
-    public void settingsButtonHandler(View view) {
+    //need to work on this, change whiteboard to fit robot
+    public void robotButtonHandler(View view) {
         //Set up the image arrays
         Boolean isDownsampled = createImageArrays();
 
-        Context context = getApplicationContext();
-        CharSequence text = "An image of the whiteboard is sending.";
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+        //Get an image of the board
+        if(!debug) {
+            Context context = getApplicationContext();
+            CharSequence text = "An image of the whiteboard is sending.";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+
+            bT = new BluetoothThread();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
+            bT.startSaving();
+
+            int code;
+            if(isDownsampled)
+                code =  0x01 << 4 | (int)requestImageCode[0];
+            else
+                code =  (int)requestImageCode[0];
+            byte [] imageRequestCode = {(byte)code};
+
+            bT.sendData(imageRequestCode);
+            //Wait until image is ready, then get the image
+            while (bT.getSaveStatus() == true);
+            imageBytes = bT.getImage();
+
+            bT = null;
+
+            // another bluetooth thread for the robot coordinates
+            bT = new BluetoothThread();
+
+
+            //work on this
+            bT.robot();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
+
+            bT.startSaving();
+
+            //robot code is 7
+            code = 7;
+            byte [] robotCoordinateRequestCode = {(byte)code};
+            bT.sendData(robotCoordinateRequestCode);
+            while (bT.getSaveStatus() == true);
+            robotCoordinateBytes = bT.getRobotCoordinates();
+
+
+        }
+
+        byte tempValue;
+        //Convert negative values to positives
+        for (int i = 0; i < imageBytes.length; i++) {
+            tempValue = imageBytes[i];
+            if (tempValue < 0)
+                imageIntegers[i] = (int) tempValue + 256;
+            else
+                imageIntegers[i] = (int) tempValue;
+        }
+
+        //Check width and height are consistent with array size
+        if ((numImagePts / 3) != (width * height / downSample)) {
+            throw new ArrayStoreException();
+        }
+
+        //Convert to bitmap
+        for (int intIndex = 0; intIndex < numImagePts/3; intIndex = intIndex + 1) {
+            intColors[intIndex] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[numImagePts/3+intIndex ] << 8) | imageIntegers[2*numImagePts/3+intIndex];
+        }
+
+        //Use the Robot Activity
+        Intent intent = new Intent(this, robotActivity.getClass());
+        intent.putExtra("COLORS", intColors);
+        intent.putExtra("ROBOTCOORDINATES", robotCoordinateBytes);
+        //isDownsampled = true;
+
+        if(isDownsampled) {
+            intent.putExtra("WIDTH", width / 2);
+            intent.putExtra("HEIGHT", height / 2);
+        }
+        else
+        {
+            intent.putExtra("WIDTH", width);
+            intent.putExtra("HEIGHT", height);
+        }
+
+        startActivityForResult(intent, GET_ROBOT_COORDINATES_ID);
+    }
+
+
+    //attempted button handler
+    /*
+    public void attemptedButtonHandler(View view) {
+        //Set up the image arrays
+        Boolean isDownsampled = createImageArrays();
 
         //Get an image of the board
         if(!debug) {
@@ -192,8 +327,117 @@ public class MainActivity extends Activity {
 
             // another bluetooth thread for the coordinates
             bT = new BluetoothThread();
-
             bT.settings();
+            bT.board();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
+            bT.startSaving();
+            code = 4;
+            byte [] coordinateRequestCode = {(byte)code};
+            bT.sendData(coordinateRequestCode);
+            while (bT.getSaveStatus() == true);
+            coordinateBytes = bT.getCoordinates();
+            bT = null;
+
+            Context context = getApplicationContext();
+            CharSequence text = "An image of the whiteboard is sending.";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+
+            //new code number needed = 7
+            // another bluetooth thread for the coordinates
+            bT = new BluetoothThread();
+            bT.settings();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
+            bT.startSaving();
+            code = 7;
+            byte [] robotCoordinateRequestCode = {(byte)code};
+            bT.sendData(robotCoordinateRequestCode);
+            while (bT.getSaveStatus() == true);
+            robotCoordinateBytes = bT.getRobotCoordinates();
+            bT = null;
+        }
+
+        byte tempValue;
+        //Convert negative values to positives
+        for (int i = 0; i < imageBytes.length; i++) {
+            tempValue = imageBytes[i];
+            if (tempValue < 0)
+                imageIntegers[i] = (int) tempValue + 256;
+            else
+                imageIntegers[i] = (int) tempValue;
+        }
+
+        //Check width and height are consistent with array size
+        if ((numImagePts / 3) != (width * height / downSample)) {
+            throw new ArrayStoreException();
+        }
+
+        //Convert to bitmap
+        for (int intIndex = 0; intIndex < numImagePts/3; intIndex = intIndex + 1) {
+            intColors[intIndex] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[numImagePts/3+intIndex ] << 8) | imageIntegers[2*numImagePts/3+intIndex];
+        }
+
+        //Use the Settings Activity
+        Intent intent = new Intent(this, settingsActivity.getClass());
+        intent.putExtra("COLORS", intColors);
+        intent.putExtra("COORDINATES", coordinateBytes);
+        intent.putExtra("ROBOTCOORDINATES",robotCoordinateBytes);
+
+        if(isDownsampled) {
+            intent.putExtra("WIDTH", width / 2);
+            intent.putExtra("HEIGHT", height / 2);
+        }
+        else
+        {
+            intent.putExtra("WIDTH", width);
+            intent.putExtra("HEIGHT", height);
+        }
+
+        startActivityForResult(intent, GET_BOARD_COORDINATES_ID);
+    }
+*/
+
+
+    //THIS CODE WORKS-- OLD CODE (settings button)
+    //Settings button handler
+    public void whiteboardButtonHandler(View view) {
+        //Set up the image arrays
+        Boolean isDownsampled = createImageArrays();
+
+        //Get an image of the board
+        if(!debug) {
+            Context context = getApplicationContext();
+            CharSequence text = "An image of the whiteboard is sending.";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+
+            bT = new BluetoothThread();
+            bT.InitBluetoothThread(socket, numImagePts);
+            bT.start();
+            bT.startSaving();
+
+            int code;
+            if(isDownsampled)
+                code =  0x01 << 4 | (int)requestImageCode[0];
+            else
+                code =  (int)requestImageCode[0];
+            byte [] imageRequestCode = {(byte)code};
+
+            bT.sendData(imageRequestCode);
+            //Wait until image is ready, then get the image
+            while (bT.getSaveStatus() == true);
+            imageBytes = bT.getImage();
+
+            bT = null;
+
+            // another bluetooth thread for the coordinates
+            bT = new BluetoothThread();
+
+            bT.whiteboard();
             bT.InitBluetoothThread(socket, numImagePts);
             bT.start();
 
@@ -205,6 +449,8 @@ public class MainActivity extends Activity {
             bT.sendData(coordinateRequestCode);
             while (bT.getSaveStatus() == true);
             coordinateBytes = bT.getCoordinates();
+
+
         }
 
         byte tempValue;
@@ -244,19 +490,17 @@ public class MainActivity extends Activity {
 
         startActivityForResult(intent, GET_BOARD_COORDINATES_ID);
     }
+    //THIS CODE WORKS
 
     //Region selection button handler
     public void regionSelectionButtonHandler(View view) {
 
-        Context context = getApplicationContext();
-        CharSequence text = "An image of the whiteboard is sending.";
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-
         //Set up the image arrays
         Boolean isDownsampled = createImageArrays();
         if(!debug) {
+
+
+
             bT = new BluetoothThread();
             bT.InitBluetoothThread(socket, numImagePts);
             bT.start();
@@ -272,6 +516,9 @@ public class MainActivity extends Activity {
             byte [] imageRequestCode = {(byte)code};
 
             bT.sendData(imageRequestCode);
+
+
+
 
             //Wait until image is ready, then get the image
 
@@ -313,11 +560,128 @@ public class MainActivity extends Activity {
             intent.putExtra("HEIGHT", height);
         }
         startActivityForResult(intent, GET_COORDINATES_ID);
+
+        Context context = getApplicationContext();
+        CharSequence text = "An image of the whiteboard is sending.";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     //Used to send coordinates defined in RegionSelectionActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        if(requestCode == GET_ROBOT_COORDINATES_ID)
+        {
+            if(resultCode == RESULT_OK)
+            {
+                //Set up the image arrays
+                Boolean isDownsampled = createImageArrays();
+
+                //Get an image of the board
+                if(!debug) {
+                    Context context = getApplicationContext();
+                    CharSequence text = "An image of the whiteboard is sending.";
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+
+                    bT = new BluetoothThread();
+                    bT.InitBluetoothThread(socket, numImagePts);
+                    bT.start();
+                    bT.startSaving();
+
+                    int code;
+                    if(isDownsampled)
+                        code =  0x01 << 4 | (int)requestImageCode[0];
+                    else
+                        code =  (int)requestImageCode[0];
+                    byte [] imageRequestCode = {(byte)code};
+
+                    bT.sendData(imageRequestCode);
+                    //Wait until image is ready, then get the image
+                    while (bT.getSaveStatus() == true);
+                    imageBytes = bT.getImage();
+
+                    bT = null;
+
+                    // another bluetooth thread for the robot coordinates
+                    bT = new BluetoothThread();
+
+
+                    //work on this
+                    bT.robot();
+                    bT.InitBluetoothThread(socket, numImagePts);
+                    bT.start();
+
+                    bT.startSaving();
+
+                    //robot code is 7
+                    code = 7;
+                    byte [] robotCoordinateRequestCode = {(byte)code};
+                    bT.sendData(robotCoordinateRequestCode);
+                    while (bT.getSaveStatus() == true);
+                    robotCoordinateBytes = bT.getRobotCoordinates();
+
+
+                }
+
+                byte tempValue;
+                //Convert negative values to positives
+                for (int i = 0; i < imageBytes.length; i++) {
+                    tempValue = imageBytes[i];
+                    if (tempValue < 0)
+                        imageIntegers[i] = (int) tempValue + 256;
+                    else
+                        imageIntegers[i] = (int) tempValue;
+                }
+
+                //Check width and height are consistent with array size
+                if ((numImagePts / 3) != (width * height / downSample)) {
+                    throw new ArrayStoreException();
+                }
+
+                //Convert to bitmap
+                for (int intIndex = 0; intIndex < numImagePts/3; intIndex = intIndex + 1) {
+                    intColors[intIndex] = (alpha << 24) | (imageIntegers[intIndex] << 16) | (imageIntegers[numImagePts/3+intIndex ] << 8) | imageIntegers[2*numImagePts/3+intIndex];
+                }
+
+                //Use the Robot Activity
+                Intent intent = new Intent(this, robotActivity.getClass());
+                intent.putExtra("COLORS", intColors);
+                intent.putExtra("ROBOTCOORDINATES", robotCoordinateBytes);
+                //isDownsampled = true;
+
+                if(isDownsampled) {
+                    intent.putExtra("WIDTH", width / 2);
+                    intent.putExtra("HEIGHT", height / 2);
+                }
+                else
+                {
+                    intent.putExtra("WIDTH", width);
+                    intent.putExtra("HEIGHT", height);
+                }
+
+                startActivityForResult(intent, GET_ROBOT_COORDINATES_ID);
+
+                //Use the Robot Activity
+                //byte [] robotCoordinates = data.getByteArrayExtra("robotCoordinates");
+                //int nRegions = data.getIntExtra("nRegions", 0);
+                //Send the coordinates to the Camera module
+
+                //int code = nRegions << 4 | (int)regionSelectionCode[0];
+                //byte [] regionCode = {(byte)code};
+
+                if(!debug) {
+                    //bT.sendData(robotRegionCode);
+
+                    //if (!bT.sendData(robotCoordinateBytes))
+                    {
+                        //Display error message
+                    }
+                }
+            }
+        }
         if(requestCode == GET_COORDINATES_ID)
         {
             if(resultCode == RESULT_OK)

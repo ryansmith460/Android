@@ -1,0 +1,98 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical" android:layout_width="match_parent"
+android:screenOrientation="portrait"
+android:layout_height="match_parent"
+android:paddingLeft="@dimen/activity_horizontal_margin"
+android:paddingRight="@dimen/activity_horizontal_margin"
+android:paddingTop="@dimen/activity_vertical_margin"
+android:paddingBottom="@dimen/activity_vertical_margin"
+android:id="@+id/robotlayout"
+android:background="#8c006eff">>
+
+<Button
+    android:layout_width="75dp"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:text="No."
+    android:id="@+id/noButton"
+    android:onClick="noButtonHandler"
+    android:layout_toRightOf="@+id/yesButton"
+    android:layout_toEndOf="@+id/yesButton"
+    android:textColor="#ffff081c" />
+
+<Button
+    android:layout_width="75dp"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:text="Yes."
+    android:id="@+id/yesButton"
+    android:layout_gravity="end"
+    android:onClick="yesButtonHandler"
+    android:layout_alignBottom="@+id/noButton"
+    android:textColor="#ffff081c" />
+
+<ImageView
+    android:id="@+id/robotImageView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    android:longClickable="true"
+    android:visibility="visible"
+    android:adjustViewBounds="true"
+    android:layout_above="@+id/noButton"
+    android:layout_below="@+id/sombrero"
+    android:layout_alignRight="@+id/drawingpane" />
+
+<ImageView
+    android:id="@+id/drawingpane"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#00ffffff"
+    android:scaleType="centerInside"
+    android:layout_alignTop="@+id/robotImageView"
+    android:visibility="visible"
+    android:layout_above="@+id/noButton"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    android:layout_below="@+id/sombrero"
+    android:adjustViewBounds="true" />
+
+<ImageView
+    android:layout_width="match_parent"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    android:layout_height="100dp"
+    android:id="@+id/sombrero"
+    android:background="@drawable/sobrero2"
+    android:paddingRight="20dp"
+    android:paddingLeft="20dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:layout_alignParentTop="true"
+    android:layout_alignRight="@+id/drawingpane"
+    android:layout_alignEnd="@+id/drawingpane"
+    android:layout_centerHorizontal="true"/>
+
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceSmall"
+    android:text="Confirm that the identified robot is actually the robot."
+    android:id="@+id/textView2"
+    android:layout_below="@+id/sombrero"
+    android:layout_centerHorizontal="true"
+    android:textSize="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Is that the robot?"
+        android:id="@+id/textView3"
+        android:layout_above="@+id/noButton"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignStart="@+id/textView2"
+        android:textSize="28dp" />
+
+</RelativeLayout>

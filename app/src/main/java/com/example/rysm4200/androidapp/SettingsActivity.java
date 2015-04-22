@@ -43,9 +43,9 @@ public class SettingsActivity extends Activity {
     int GET_BOARD_COORDINATES_ID;
     ImageView settingsWhiteboardImageView;
 
-    boolean debug = true;
+    boolean debug = false;
     boolean save = false;
-    int sensitivity = 50;
+    int sensitivity = 51;
 
     RelativeLayout settingsLayout;
 
@@ -126,6 +126,9 @@ public class SettingsActivity extends Activity {
 
     public void goBackSettingsButtonHandler(View view) {
         //Use the Main Activity to exit this screen without erasing regions
+        Intent data = new Intent();
+        data.putExtra("Coordinates", whiteboard);
+        setResult(RESULT_OK, data);
         finish();
     }
 
@@ -352,4 +355,3 @@ public class SettingsActivity extends Activity {
         }
     }
 }
-
