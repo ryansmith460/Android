@@ -50,6 +50,8 @@ public class MainActivity extends Activity {
     int[] imageIntegers;
     byte[] imageBytes;
     byte[] coordinateBytes;
+    byte[] robotCoordinateBytes;
+
     int[] intColors;
 
     //Region Selection Activity
@@ -59,6 +61,10 @@ public class MainActivity extends Activity {
     //Settings Activity
     SettingsActivity settingsActivity;
     int GET_BOARD_COORDINATES_ID = 2;
+
+    //Robot activity
+    RobotActivity robotActivity;
+    int GET_ROBOT_COORDINATES_ID = 3;
 
     //New Board Region
     byte[] boardRegionCode = {0};
