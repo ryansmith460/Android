@@ -29,7 +29,6 @@ public class MainActivity extends Activity {
 
 
 
-
     //Bluetooth
     private BluetoothProfile mBluetoothProfile;
     private BluetoothAdapter adapter = null;
@@ -51,7 +50,6 @@ public class MainActivity extends Activity {
     int[] imageIntegers;
     byte[] imageBytes;
     byte[] coordinateBytes;
-    byte[] robotCoordinateBytes;
     int[] intColors;
 
     //Region Selection Activity
@@ -62,16 +60,10 @@ public class MainActivity extends Activity {
     SettingsActivity settingsActivity;
     int GET_BOARD_COORDINATES_ID = 2;
 
-    //Robot Activity
-    RobotActivity robotActivity;
-    //CAN I USE 3?!??!?
-    int GET_ROBOT_COORDINATES_ID = 3;
-
     //New Board Region
     byte[] boardRegionCode = {0};
     //Erase All
     boolean eraseAll = false;
-
     byte[] eraseAllCode = {1};
 
     //Emergency Stop
@@ -94,7 +86,6 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //done = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -134,7 +125,6 @@ public class MainActivity extends Activity {
             //create robot activity
             robotActivity = new RobotActivity();
             robotActivity.Init(GET_ROBOT_COORDINATES_ID);
-
 
     }
 
@@ -498,9 +488,6 @@ public class MainActivity extends Activity {
         //Set up the image arrays
         Boolean isDownsampled = createImageArrays();
         if(!debug) {
-
-
-
             bT = new BluetoothThread();
             bT.InitBluetoothThread(socket, numImagePts);
             bT.start();
@@ -516,9 +503,6 @@ public class MainActivity extends Activity {
             byte [] imageRequestCode = {(byte)code};
 
             bT.sendData(imageRequestCode);
-
-
-
 
             //Wait until image is ready, then get the image
 
